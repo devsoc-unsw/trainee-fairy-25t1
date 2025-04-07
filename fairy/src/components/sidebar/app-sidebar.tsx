@@ -2,23 +2,23 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   BarChartIcon,
   BriefcaseIcon,
   BuildingIcon,
   Calendar,
   CameraIcon,
   ClipboardListIcon,
-  Command,
+  Code,
   DatabaseIcon,
   FileCodeIcon,
   FileIcon,
   FileTextIcon,
-  GalleryVerticalEnd,
   HelpCircleIcon,
+  Laptop,
   LayoutDashboardIcon,
   SearchIcon,
   SettingsIcon,
+  Terminal,
   UsersIcon,
   Wrench,
 } from "lucide-react"
@@ -44,17 +44,17 @@ const data = {
   teams: [
     {
       name: "CSESoc",
-      logo: GalleryVerticalEnd,
+      logo: Terminal,
       plan: "Enterprise",
     },
     {
       name: "DevSoc",
-      logo: AudioWaveform,
+      logo: Code,
       plan: "Startup",
     },
     {
       name: "CompClub",
-      logo: Command,
+      logo: Laptop,
       plan: "Free",
     },
   ],
