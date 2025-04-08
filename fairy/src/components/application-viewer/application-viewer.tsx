@@ -8,13 +8,15 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 import { z } from "zod"
 import { schema } from "../table/data-table"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Application, Question, Questions, dummyData } from "./dummy-data"
 import { useState } from "react"
-import { ClipboardIcon, FileTextIcon, UserIcon } from "lucide-react"
+import { CircleAlertIcon, ClipboardIcon, FileTextIcon, FlagIcon, SendIcon, ThumbsUpIcon, UserIcon } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 
 const getStatusColour = (status: string) => {
   switch (status) {
@@ -49,17 +51,17 @@ function formatAnswer(answer: string | string[], type: string) {
   }
 
   if (type === "longText") {
-    return <div className="whitespace-pre-wrap">{answer}</div>
+    return <div className="whitespace-pre-wrap text-sm">{answer}</div>
   }
 
-  return <div>{answer}</div>
+  return <div className="text-sm">{answer}</div>
 }
 
 export default function ApplicationViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
   
   const { zid, name, email, applications, diversity, recommendations, redFlags, coi } = dummyData;
-  const { gender, education, student_type, year } = diversity;
+  const { gender, education, degree, student_type, year } = diversity;
   
   const [application, setApplication] = useState<Application>(applications[0]);
 
@@ -122,61 +124,234 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
               </TabsTrigger>
             </TabsList>
           </div>
+          
+          <TabsContent value="application">
+            <ResizablePanelGroup
+              direction="horizontal"
+            >
+              <ResizablePanel defaultSize={75} className="pr-3">
+                <ScrollArea className="h-[calc(90vh-180px)]">
+                  <div className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Questions</CardTitle>
+                        <CardDescription>Common questions for all portfolios</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* map over questions and display correspond answer */}
+                        {Questions["general"].map((question: Question, index: number) => (
+                          <div key={question.id} className="space-y-1.5">
+                            <h4 className="font-medium text-sm">
+                              {index + 1}. {question.question}
+                            </h4>
+                            <div className="pl-4 border-l-2 border-muted">
+                              {formatAnswer(application.answers.general[question.id], question.type)}
+                            </div>
 
-          <ScrollArea className="h-[calc(80vh-180px)]">
-            <TabsContent value="application" className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Questions</CardTitle>
-                  <CardDescription>Common questions for all portfolios</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* map over questions and display correspond answer */}
-                  {Questions["general"].map((question: Question, index: number) => (
-                    <div key={question.id} className="space-y-1.5">
-                      <h4 className="font-medium">
-                        {index + 1}. {question.question}
-                      </h4>
-                      <div className="pl-4 border-l-2 border-muted">
-                        {formatAnswer(application.answers.general[question.id], question.type)}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="capitalize">{application.portfolio} Questions</CardTitle>
+                        <CardDescription>Portfolio-specific questions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* map over questions and display correspond answer */}
+                        {Questions[application.portfolio].map((question: Question, index: number) => (
+                          <div key={question.id} className="space-y-1.5">
+                            <h4 className="font-medium text-sm">
+                              {index + 1}. {question.question}
+                            </h4>
+                            <div className="pl-4 border-l-2 border-muted">
+                              {formatAnswer(application.answers.specific[question.id], question.type)}
+                            </div>
+
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </ScrollArea>
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={25} className="pl-3">
+                <div className="h-full flex flex-col justify-between">
+                  <div className="flex flex-col space-y-3">
+                    <Card className="py-2">
+                      <CardContent className="flex h-24 items-center justify-center">
+                        <span className="font-semibold">Comment 1</span>
+                      </CardContent>
+                    </Card>
+                    <Card className="py-2">
+                      <CardContent className="flex h-24 items-center justify-center">
+                        <span className="font-semibold">Comment 2</span>
+                      </CardContent>
+                    </Card>
+                    <Card className="py-2">
+                      <CardContent className="flex h-24 items-center justify-center">
+                        <span className="font-semibold">Comment 3</span>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <Card>
+                    <CardContent className="flex flex-col items-center">
+                      <Textarea
+                        placeholder="Add your comment..."
+                        className="max-w-lg resize-none text-base mb-3"
+                        rows={5}
+                      />
+                      <Button className="w-full max-w-lg">
+                        <SendIcon />
+                        Add Comment
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <ScrollArea className="h-[calc(90vh-180px)] space-y-4">
+              <div className="space-y-4">
+                {/* General info */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Profile</CardTitle>
+                    <CardDescription>Profile information</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Full name</Label>
+                        <p className="text-base font-medium">{name}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Email</Label>
+                        <p className="text-base font-medium">{email}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">zID</Label>
+                        <p className="text-base font-medium">{zid}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Degree</Label>
+                        <p className="text-base font-medium">{degree}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Diversity info */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Diversity</CardTitle>
+                    <CardDescription>Equity and diversity information</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Gender</Label>
+                        <p className="text-base font-medium">{gender}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Education</Label>
+                        <p className="text-base font-medium">{education}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Student type</Label>
+                        <p className="text-base font-medium">{student_type}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm text-muted-foreground">Year of study</Label>
+                        <p className="text-base font-medium">{year}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="review" className="space-y-4">
+            <ScrollArea className="h-[calc(90vh-180px)]">
+              <div className="space-y-4">
+                {/* Recommendations */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Flags</CardTitle>
+                    <CardDescription>Recommendations, red flags, and COI</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Red Flags */}
+                      <div>
+                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
+                          <FlagIcon className="h-5 w-5 text-red-500" />
+                          Red Flags
+                        </h3>
+                        {redFlags.length > 0 ? (
+                          <div className="space-y-2">
+                              {redFlags.map((comment) => (
+                                <div key={comment.id} className="bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-200 p-3 rounded-md text-base flex flex-col space-y-1">
+                                  <span className="font-bold text-sm">{comment.author}</span>
+                                  <span>{comment.comment}</span>
+                                  {/* <span>{comment.date}</span> */}
+                                </div>
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground text-base">No red flags identified.</div>
+                        )}
                       </div>
 
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="capitalize">{application.portfolio} Questions</CardTitle>
-                  <CardDescription>Portfolio-specific questions</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* map over questions and display correspond answer */}
-                  {Questions[application.portfolio].map((question: Question, index: number) => (
-                    <div key={question.id} className="space-y-1.5">
-                      <h4 className="font-medium">
-                        {index + 1}. {question.question}
-                      </h4>
-                      <div className="pl-4 border-l-2 border-muted">
-                        {formatAnswer(application.answers.specific[question.id], question.type)}
+                      {/* Green Flags / Recommendations */}
+                      <div>
+                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
+                          <ThumbsUpIcon className="h-5 w-5 text-green-500" />
+                          Recommendations
+                        </h3>
+                        {recommendations.length > 0 ? (
+                          <div className="space-y-2">
+                            {recommendations.map((comment) => (
+                              <div key={comment.id} className="bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-200 p-3 rounded-md text-base flex flex-col space-y-1">
+                                  <span className="font-bold text-sm">{comment.author}</span>
+                                  <span>{comment.comment}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground text-base">No recommendations yet.</div>
+                        )}
                       </div>
 
+                      {/* Conflicts of Interest */}
+                      <div>
+                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
+                          <CircleAlertIcon className="h-5 w-5 text-yellow-500" />
+                          Conflicts of Interest
+                        </h3>
+                        {coi.length > 0  ? (
+                          <div className="space-y-2">
+                            {coi.map((comment) => (
+                              <div key={comment.id} className="bg-yellow-50 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200 p-3 rounded-md text-base flex flex-col space-y-1">
+                                  <span className="font-bold text-sm">{comment.author}</span>
+                                  <span>{comment.comment}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground text-base">No conflicts of interest declared.</div>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="profile">
-              <Card>
-                <CardContent>
-                  
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="review">
-
-            </TabsContent>
-          </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>

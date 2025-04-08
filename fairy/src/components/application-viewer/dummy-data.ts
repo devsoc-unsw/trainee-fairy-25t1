@@ -62,18 +62,54 @@ export const dummyData = {
   applications: [ marketingApplication, educationApplication ],
   diversity: {
     student_type: "International",
+    degree: "Commerce and Computer Science",
     education: "Undergraduate",
     gender: "Female",
     year: 3
   },
   recommendations: [
     {
-      author: "Eddie Lake",
-      comment: "Creative thinker with excellent portfolio"
+      id: "rec1",
+      date: new Date("2024-04-10"),
+      author: "Mingyuan Xu",
+      comment: "Huzz."
     }
   ],
-  redFlags: [],
-  coi: []
+  redFlags: [
+    {
+      id: "red1",
+      date: new Date("2024-04-10"),
+      author: "Daniel Wang",
+      comment: "She bullied me in high school and stole my lunch money!"
+    },
+    {
+      id: "red2",
+      date: new Date("2024-04-10"),
+      author: "Mingyuan Xu",
+      comment: "Chuzz."
+    }
+  ],
+  coi: [
+    {
+      id: "coi1",
+      date: new Date("2024-04-10"),
+      author: "Kevin He",
+      comment: "I was friends with this guy in high school."
+    },
+    {
+      id: "coi2",
+      date: new Date("2024-04-10"),
+      author: "Mingyuan Xu",
+      comment: "Chuzz."
+    }
+  ]
+}
+
+export type Comment = {
+  id: string
+  date: Date
+  author: string
+  comment: string
 }
 
 export type Application = {
