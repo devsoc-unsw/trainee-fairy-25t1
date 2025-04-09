@@ -23,7 +23,7 @@ const marketingApplication: Application = {
       "campaign-idea":
         "I propose a 'Member Spotlight' campaign that showcases the diverse talents and achievements of society members. Each week, we would feature a different member across all social media platforms, highlighting their work, contributions, and personal story. This would humanize the society, showcase the benefits of membership, and create engaging, shareable content that reaches potential new members through existing networks.",
     }
-  }
+  },
 }
 
 const educationApplication: Application = {

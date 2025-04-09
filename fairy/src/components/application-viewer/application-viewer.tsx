@@ -144,51 +144,69 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
             <ResizablePanelGroup
               direction="horizontal"
             >
-              <ResizablePanel defaultSize={70} minSize={50} className="pr-3 h-[calc(90vh-180px)]">
-                <ScrollArea className="h-full border rounded-2xl shadow-sm bg-card">
-                  <div className="p-6 space-y-3">
-                    <div className="space-y-1">
-                      <h3 className="leading-none font-semibold">General Questions</h3>
-                      <p className="text-muted-foreground text-sm">Common questions for all portfolios</p>
-                    </div>
-                    <div className="space-y-6">
-                      {Questions["general"].map((question: Question, index: number) => (
-                        <div key={question.id} className="space-y-1.5">
-                          <h4 className="font-medium text-sm">
-                            {index + 1}. {question.question}
-                          </h4>
-                          <div className="pl-4 border-l-2 border-muted">
-                            {formatAnswer(application.answers.general[question.id], question.type)}
-                          </div>
-
+              <ResizablePanel defaultSize={67} minSize={40} className="pr-3 h-[calc(90vh-180px)]">
+                <Card className="h-full">
+                  <CardContent className="h-full px-3">
+                    <ScrollArea className="h-full">
+                      <div className="px-3 space-y-3">
+                        <div className="space-y-1">
+                          <h3 className="leading-none font-semibold">General Questions</h3>
+                          <p className="text-muted-foreground text-sm">Common questions for all portfolios</p>
                         </div>
-                      ))}
-                    </div>
-                    <Separator className="my-8"/>
-                    <div className="space-y-1">
-                      <h3 className="leading-none font-semibold capitalize">{application.portfolio} Questions</h3>
-                      <p className="text-muted-foreground text-sm">Portfolio-specific questions</p>
-                    </div>
-                    <div className="space-y-6">
-                      {Questions[application.portfolio].map((question: Question, index: number) => (
-                        <div key={question.id} className="space-y-1.5">
-                          <h4 className="font-medium text-sm">
-                            {index + 1}. {question.question}
-                          </h4>
-                          <div className="pl-4 border-l-2 border-muted">
-                            {formatAnswer(application.answers.specific[question.id], question.type)}
-                          </div>
+                        <div className="space-y-6">
+                          {Questions["general"].map((question: Question, index: number) => (
+                            <div key={question.id} className="space-y-1.5">
+                              <h4 className="font-medium text-sm">
+                                {index + 1}. {question.question}
+                              </h4>
+                              <div className="pl-4 border-l-2 border-muted">
+                                {formatAnswer(application.answers.general[question.id], question.type)}
+                              </div>
 
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </ScrollArea>
+                        <Separator className="my-8"/>
+                        <div className="space-y-1">
+                          <h3 className="leading-none font-semibold capitalize">{application.portfolio} Questions</h3>
+                          <p className="text-muted-foreground text-sm">Portfolio-specific questions</p>
+                        </div>
+                        <div className="space-y-6">
+                          {Questions[application.portfolio].map((question: Question, index: number) => (
+                            <div key={question.id} className="space-y-1.5">
+                              <h4 className="font-medium text-sm">
+                                {index + 1}. {question.question}
+                              </h4>
+                              <div className="pl-4 border-l-2 border-muted">
+                                {formatAnswer(application.answers.specific[question.id], question.type)}
+                              </div>
+
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={30} minSize={20} className="pl-3 h-[calc(90vh-180px)]">
-                <Card className="h-1/3 p-0">
-                  <CardContent className="p-3 h-full flex flex-col">
+              <ResizablePanel defaultSize={33} minSize={20} className="pl-3 h-[calc(90vh-180px)] grid grid-cols-1 grid-rows-3 space-y-2">
+                <Card className="row-span-2">
+                  <CardContent className="h-full px-2">
+                    <ScrollArea className="h-full">
+                      <div className="px-3 space-y-4">
+                        <h3 className="leading-none font-semibold">Director Comments</h3>
+                        <div className="space-y-2">
+                          <div className="bg-muted h-18 rounded-md"></div>
+                          <div className="bg-muted h-48 rounded-md"></div>
+                          <div className="bg-muted h-32 rounded-md"></div>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+                <Card className="row-span-1 p-0">
+                  <CardContent className="h-full flex flex-col p-3">
                     <div className="flex-1 min-h-0 mb-3">
                       <Textarea
                         placeholder="Add your comment..."
