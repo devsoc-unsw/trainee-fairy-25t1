@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 import { z } from "zod"
@@ -16,7 +18,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { Application, Question, Questions, dummyData } from "./dummy-data"
 import { useState } from "react"
 import { CircleAlertIcon, ClipboardIcon, FileTextIcon, FlagIcon, SendIcon, ThumbsUpIcon, UserIcon } from "lucide-react"
-import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 
 const getStatusColour = (status: string) => {
   switch (status) {
@@ -62,8 +64,24 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
   
   const { zid, name, email, applications, diversity, recommendations, redFlags, coi } = dummyData;
   const { gender, education, degree, student_type, year } = diversity;
-  
   const [application, setApplication] = useState<Application>(applications[0]);
+
+  const onViewSwitch = (value: string) => {
+    const portfolioName = getApplicationFromPortfolioName(value)
+    setApplication(portfolioName)
+
+    // TODO: replace with actual API call
+    // TODO: also create loading state for entire modal
+    const promise = () => new Promise((resolve) => setTimeout(() => resolve({ name: application.portfolio === "education" ? "Marketing" : "Education "}), 1000));
+
+    toast.promise(promise, {
+      loading: 'Switching...',
+      success: (data) => {
+        return `Now viewing ${(data as { name: string }).name} application`;
+      },
+      error: 'Error',
+    });
+  }
 
   return (
     <Dialog>
@@ -72,143 +90,117 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
           {item.header}
         </Button>
       </DialogTrigger>
-      {/* TODO: figure out why width sizing is so weird, NEED TO SET MAX-W */}
-      <DialogContent className="min-w-3/5">
-        <DialogHeader className="sticky top-0 z-10 flex flex-row justify-between items-center">
+      <DialogContent className="gap-2 min-w-full sm:min-w-[640px] md:min-w-[768px] lg:min-w-[1024px] xl:min-w-[1280px] 2xl:min-w-[1536px]">
+        <DialogHeader className="bg flex flex-row justify-between items-center">
           <div className="flex flex-col justify-start space-y-2">
             <DialogTitle className="text-2xl">{name}</DialogTitle>
             <div className="flex space-x-2">
-              <Badge className={`${getStatusColour(application.status)} capitalize`}>
+              <Badge className={`px-3 py-1 text-sm font-medium ${getStatusColour(application.status)} capitalize`}>
                 {application.status}
               </Badge>
-              <Badge variant="secondary">
-                Score: {application.score ?? "-"}
+              <Badge variant="secondary" className={`px-3 py-1 text-sm font-medium ${!application.score && "opacity-50"}`}>
+                <span>Score: {application.score ?? "-"} / 100</span>
               </Badge>
             </div>
           </div>
           {applications.length > 1 && (
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="portfolio-selector" className="text-xs text-muted-foreground">
-                  Viewing Application For
-                </Label>
-                <Select value={application.portfolio} onValueChange={(value) => {setApplication(getApplicationFromPortfolioName(value))}}>
-                  <SelectTrigger id="portfolio-selector" className="w-[200px]">
-                    <SelectValue placeholder="Select portfolio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {applications.map((app) => (
-                      <SelectItem key={app.portfolio} value={app.portfolio}>
-                        <span className="capitalize">{app.portfolio}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="portfolio-selector" className="text-xs text-muted-foreground">
+                Viewing Application For
+              </Label>
+              <Select value={application.portfolio} onValueChange={(value) => onViewSwitch(value)}>
+                <SelectTrigger id="portfolio-selector" className="w-[200px]">
+                  <SelectValue placeholder="Select portfolio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {applications.map((app) => (
+                    <SelectItem key={app.portfolio} value={app.portfolio}>
+                      <span className="capitalize">{app.portfolio}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </DialogHeader>
 
-        <Tabs defaultValue="application" className="w-full">
-          <div className="sticky top-[105px] z-10 bg-background">
-            <TabsList className="w-full justify-start">
-              <TabsTrigger value="application" className="flex gap-2">
-                <FileTextIcon />
-                <span>Application</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex gap-2">
-                <UserIcon />
-                <span>Profile</span>
-              </TabsTrigger>
-              <TabsTrigger value="review" className="flex gap-2">
-                <ClipboardIcon />
-                <span>Review</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        <Tabs defaultValue="application" className="max-w-full overflow-hidden">
+          <TabsList className="w-full">
+            <TabsTrigger value="application" className="flex gap-2">
+              <FileTextIcon />
+              <span>Application</span>
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex gap-2">
+              <UserIcon />
+              <span>Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="review" className="flex gap-2">
+              <ClipboardIcon />
+              <span>Review</span>
+            </TabsTrigger>
+          </TabsList>
           
-          <TabsContent value="application">
+          <TabsContent value="application" className="container">
             <ResizablePanelGroup
               direction="horizontal"
             >
-              <ResizablePanel defaultSize={75} className="pr-3">
-                <ScrollArea className="h-[calc(90vh-180px)]">
-                  <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>General Questions</CardTitle>
-                        <CardDescription>Common questions for all portfolios</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        {/* map over questions and display correspond answer */}
-                        {Questions["general"].map((question: Question, index: number) => (
-                          <div key={question.id} className="space-y-1.5">
-                            <h4 className="font-medium text-sm">
-                              {index + 1}. {question.question}
-                            </h4>
-                            <div className="pl-4 border-l-2 border-muted">
-                              {formatAnswer(application.answers.general[question.id], question.type)}
-                            </div>
-
+              <ResizablePanel defaultSize={70} minSize={50} className="pr-3 h-[calc(90vh-180px)]">
+                <ScrollArea className="h-full border rounded-2xl shadow-sm bg-card">
+                  <div className="p-6 space-y-3">
+                    <div className="space-y-1">
+                      <h3 className="leading-none font-semibold">General Questions</h3>
+                      <p className="text-muted-foreground text-sm">Common questions for all portfolios</p>
+                    </div>
+                    <div className="space-y-6">
+                      {Questions["general"].map((question: Question, index: number) => (
+                        <div key={question.id} className="space-y-1.5">
+                          <h4 className="font-medium text-sm">
+                            {index + 1}. {question.question}
+                          </h4>
+                          <div className="pl-4 border-l-2 border-muted">
+                            {formatAnswer(application.answers.general[question.id], question.type)}
                           </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="capitalize">{application.portfolio} Questions</CardTitle>
-                        <CardDescription>Portfolio-specific questions</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        {/* map over questions and display correspond answer */}
-                        {Questions[application.portfolio].map((question: Question, index: number) => (
-                          <div key={question.id} className="space-y-1.5">
-                            <h4 className="font-medium text-sm">
-                              {index + 1}. {question.question}
-                            </h4>
-                            <div className="pl-4 border-l-2 border-muted">
-                              {formatAnswer(application.answers.specific[question.id], question.type)}
-                            </div>
 
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-8"/>
+                    <div className="space-y-1">
+                      <h3 className="leading-none font-semibold capitalize">{application.portfolio} Questions</h3>
+                      <p className="text-muted-foreground text-sm">Portfolio-specific questions</p>
+                    </div>
+                    <div className="space-y-6">
+                      {Questions[application.portfolio].map((question: Question, index: number) => (
+                        <div key={question.id} className="space-y-1.5">
+                          <h4 className="font-medium text-sm">
+                            {index + 1}. {question.question}
+                          </h4>
+                          <div className="pl-4 border-l-2 border-muted">
+                            {formatAnswer(application.answers.specific[question.id], question.type)}
                           </div>
-                        ))}
-                      </CardContent>
-                    </Card>
+
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </ScrollArea>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={25} className="pl-3">
-                <div className="h-full flex flex-col justify-between">
-                  <div className="flex flex-col space-y-3">
-                    <Card className="py-2">
-                      <CardContent className="flex h-24 items-center justify-center">
-                        <span className="font-semibold">Comment 1</span>
-                      </CardContent>
-                    </Card>
-                    <Card className="py-2">
-                      <CardContent className="flex h-24 items-center justify-center">
-                        <span className="font-semibold">Comment 2</span>
-                      </CardContent>
-                    </Card>
-                    <Card className="py-2">
-                      <CardContent className="flex h-24 items-center justify-center">
-                        <span className="font-semibold">Comment 3</span>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <Card>
-                    <CardContent className="flex flex-col items-center">
+              <ResizablePanel defaultSize={30} minSize={20} className="pl-3 h-[calc(90vh-180px)]">
+                <Card className="h-1/3 p-0">
+                  <CardContent className="p-3 h-full flex flex-col">
+                    <div className="flex-1 min-h-0 mb-3">
                       <Textarea
                         placeholder="Add your comment..."
-                        className="max-w-lg resize-none text-base mb-3"
-                        rows={5}
+                        className="bg-input/30 h-full min-h-full max-w-full resize-none border-none shadow-none overflow-auto break-words "
                       />
-                      <Button className="w-full max-w-lg">
-                        <SendIcon />
-                        Add Comment
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                    <Button className="w-full">
+                      <SendIcon />
+                      Add Comment
+                    </Button>
+                  </CardContent>
+                </Card>
               </ResizablePanel>
             </ResizablePanelGroup>
           </TabsContent>
@@ -278,6 +270,32 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
           <TabsContent value="review" className="space-y-4">
             <ScrollArea className="h-[calc(90vh-180px)]">
               <div className="space-y-4">
+                {/* Other portfolios */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      Other Portfolios
+                      <Badge variant="secondary" className="ml-2">
+                        {applications.length}
+                      </Badge>
+                    </CardTitle>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {applications.map((app) => (
+                          <div key={app.portfolio} className="flex items-center space-x-3">
+                            <span className="text-base font-medium capitalize">{app.portfolio}:</span>
+                            <Badge variant="outline" className={`px-3 py-1 text-sm font-medium border-none ${getStatusColour(app.status)}`}>
+                              {app.status}
+                            </Badge>
+                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                              <span>Score: {app.score ?? "-"} / 100</span>
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </CardHeader>
+                </Card>
                 {/* Recommendations */}
                 <Card>
                   <CardHeader>

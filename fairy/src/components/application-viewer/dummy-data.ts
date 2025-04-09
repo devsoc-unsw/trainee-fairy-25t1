@@ -96,12 +96,6 @@ export const dummyData = {
       author: "Kevin He",
       comment: "I was friends with this guy in high school."
     },
-    {
-      id: "coi2",
-      date: new Date("2024-04-10"),
-      author: "Mingyuan Xu",
-      comment: "Chuzz."
-    }
   ]
 }
 
