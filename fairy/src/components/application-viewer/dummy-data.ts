@@ -24,6 +24,22 @@ const marketingApplication: Application = {
         "I propose a 'Member Spotlight' campaign that showcases the diverse talents and achievements of society members. Each week, we would feature a different member across all social media platforms, highlighting their work, contributions, and personal story. This would humanize the society, showcase the benefits of membership, and create engaging, shareable content that reaches potential new members through existing networks.",
     }
   },
+  feedback: [
+    {
+      id: "mktFeedback1",
+      date: new Date("2024-04-10"),
+      author: "Travis Scott",
+      comment: "Great application! I love the marketing campaign idea.",
+      score: 95,
+    },
+    {
+      id: "mktFeedback2",
+      date: new Date("2024-04-10"),
+      author: "Jordan Carter",
+      comment: "Impressive experience with social media management. I think you would be a great fit for the marketing team.",
+      score: 88,
+    }
+  ]
 }
 
 const educationApplication: Application = {
@@ -52,7 +68,16 @@ const educationApplication: Application = {
       "dev-challenge":
         "I would start by understanding the society's needs and target audience through stakeholder interviews. Then, I'd create wireframes and mockups for approval before development. For implementation, I'd use Next.js for its SEO benefits and server-side rendering capabilities, with a clean, responsive design. I'd ensure the site is accessible, mobile-friendly, and easy to maintain, with clear documentation for future developers.",
     }
-  }
+  },
+  feedback: [
+    // {
+    //   id: "eduFeedback1",
+    //   date: new Date("2024-04-10"),
+    //   author: "Anthony Edwards",
+    //   comment: "Good application overall. I like the GitHub link.",
+    //   score: 85,
+    // }
+  ]
 }
 
 export const dummyData = {
@@ -99,11 +124,12 @@ export const dummyData = {
   ]
 }
 
-export type Comment = {
+export type Feedback = {
   id: string
   date: Date
   author: string
   comment: string
+  score: number | null
 }
 
 export type Application = {
@@ -116,6 +142,7 @@ export type Application = {
     general: Record<string, string>
     specific: Record<string, string | string[]>
   }
+  feedback: Feedback[]
 }
 
 export type Question = {

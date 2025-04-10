@@ -15,7 +15,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { z } from "zod"
 import { schema } from "../table/data-table"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Application, Question, Questions, dummyData } from "./dummy-data"
+import { Application, Feedback, Question, Questions, dummyData } from "./dummy-data"
 import { useState } from "react"
 import { CircleAlertIcon, ClipboardIcon, FileTextIcon, FlagIcon, SendIcon, ThumbsUpIcon, UserIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -57,6 +57,19 @@ function formatAnswer(answer: string | string[], type: string) {
   }
 
   return <div className="text-sm">{answer}</div>
+}
+
+const FeedbackBlock = ({ feedback }: { feedback: Feedback }) => {
+  return (
+    <div className="bg-muted/75 rounded-lg p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="font-medium text-sm">{feedback.author}: {feedback.score}</span>
+        <span className="text-xs text-muted-foreground ml-auto">2 days ago</span>
+      </div>
+      <p className="text-sm">{feedback.comment}</p>
+    </div>
+
+  )
 }
 
 export default function ApplicationViewer({ item }: { item: z.infer<typeof schema> }) {
@@ -196,11 +209,15 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
                     <ScrollArea className="h-full">
                       <div className="px-3 space-y-4">
                         <h3 className="leading-none font-semibold">Director Comments</h3>
-                        <div className="space-y-2">
-                          <div className="bg-muted h-18 rounded-md"></div>
-                          <div className="bg-muted h-48 rounded-md"></div>
-                          <div className="bg-muted h-32 rounded-md"></div>
-                        </div>
+                        {application.feedback.length === 0 ? (
+                          <div className="text-muted-foreground text-sm">No comments yet.</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {application.feedback.map((feedback) => (
+                              <FeedbackBlock key={feedback.id} feedback={feedback} />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </ScrollArea>
                   </CardContent>
