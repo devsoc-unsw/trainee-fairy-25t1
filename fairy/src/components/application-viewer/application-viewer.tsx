@@ -1,5 +1,6 @@
 "use client"
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +21,7 @@ import { useState } from "react"
 import { CircleAlertIcon, ClipboardIcon, FileTextIcon, FlagIcon, SendIcon, ThumbsUpIcon, UserIcon } from "lucide-react"
 import { toast } from "sonner"
 
+/* ----------------------- UTIL FUNCTIONS (MOVE LATER) ---------------------- */
 const getStatusColour = (status: string) => {
   switch (status) {
     case "accepted":
@@ -59,11 +61,33 @@ function formatAnswer(answer: string | string[], type: string) {
   return <div className="text-sm">{answer}</div>
 }
 
+function getInitials(name: string): string {
+  if (!name || typeof name !== "string") return "";
+
+  const parts = name.trim().split(/\s+/);
+
+  if (parts.length === 1) {
+    // Only one name: first two letters
+    return parts[0].slice(0, 2).toUpperCase();
+  } else {
+    // Two or more names: first letter of first + first letter of last
+    const first = parts[0][0];
+    const last = parts[parts.length - 1][0];
+    return (first + last).toUpperCase();
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* ------------------------------- COMPONENTS ------------------------------- */
 const FeedbackBlock = ({ feedback }: { feedback: Feedback }) => {
   return (
-    <div className="bg-muted/75 rounded-lg p-3">
+    <div className="bg-muted/50 rounded-lg p-3">
       <div className="flex items-center gap-2 mb-1">
-        <span className="font-medium text-sm">{feedback.author}: {feedback.score}</span>
+        <Avatar className="h-6 w-6">
+          <AvatarFallback className="text-xs">{getInitials(feedback.author)}</AvatarFallback>
+        </Avatar>
+        <span className="font-medium text-sm">{feedback.author}</span>
         <span className="text-xs text-muted-foreground ml-auto">2 days ago</span>
       </div>
       <p className="text-sm">{feedback.comment}</p>
@@ -71,6 +95,7 @@ const FeedbackBlock = ({ feedback }: { feedback: Feedback }) => {
 
   )
 }
+/* -------------------------------------------------------------------------- */
 
 export default function ApplicationViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()

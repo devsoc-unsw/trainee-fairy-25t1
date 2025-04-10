@@ -38,7 +38,14 @@ const marketingApplication: Application = {
       author: "Jordan Carter",
       comment: "Impressive experience with social media management. I think you would be a great fit for the marketing team.",
       score: 88,
-    }
+    },
+    {
+      id: "mktFeedback3",
+      date: new Date("2024-04-10"),
+      author: "Anthony Edwards",
+      comment: "Good application overall. I like the GitHub link.",
+      score: 85,
+    },
   ]
 }
 
@@ -69,15 +76,7 @@ const educationApplication: Application = {
         "I would start by understanding the society's needs and target audience through stakeholder interviews. Then, I'd create wireframes and mockups for approval before development. For implementation, I'd use Next.js for its SEO benefits and server-side rendering capabilities, with a clean, responsive design. I'd ensure the site is accessible, mobile-friendly, and easy to maintain, with clear documentation for future developers.",
     }
   },
-  feedback: [
-    // {
-    //   id: "eduFeedback1",
-    //   date: new Date("2024-04-10"),
-    //   author: "Anthony Edwards",
-    //   comment: "Good application overall. I like the GitHub link.",
-    //   score: 85,
-    // }
-  ]
+  feedback: []
 }
 
 export const dummyData = {
