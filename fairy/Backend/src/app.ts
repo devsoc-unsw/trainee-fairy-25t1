@@ -15,3 +15,45 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// ---------------- AUTH ----------------
+// register - Post
+// login - Post
+// logout - Post
+
+// ---------------- SOCIETY ----------------
+// createSoc - Post
+// createRecruitmentDrive - Post
+// addAdmin - Post
+
+// ---------------- RECRUITMENT DRIVE ----------------
+// createPortfolio - Post
+// editPortfolio - 
+// deletePortfolio - 
+
+// ---------------- PORTFOLIO ----------------
+// createForm - involves creating questions
+// editForm - involves editing questions
+// addReviewers
+
+// ----------------- FORM -------------------
+// createForm - create a form
+// editForm - edit a form
+// Forms - Get all Forms
+// GetForm
+
+// ---------------- APPLICATIONS ----------------
+// addFeedback - comment, score
+// editFeedback
+// deleteFeedback
+// setApplicationStatus
+
+// ---------------- APPLICANT ----------------
+// submitApplication
+// 
+
+// ----------------- PROFILE -------------------------
+
+// EditProfile
+//
+
