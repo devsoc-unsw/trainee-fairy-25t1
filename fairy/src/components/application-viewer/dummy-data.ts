@@ -79,6 +79,14 @@ const educationApplication: Application = {
   feedback: []
 }
 
+export type Flag = {
+  id: string
+  type: "red" | "green"
+  date: Date
+  author: string
+  comment: string
+}
+
 export const dummyData = {
   zid: "z1234567",
   name: "Isabella Garcia",
@@ -91,36 +99,29 @@ export const dummyData = {
     gender: "Female",
     year: 3
   },
-  recommendations: [
+  flags: [
     {
-      id: "rec1",
+      id: "green1",
+      type: "green",
       date: new Date("2024-04-10"),
       author: "Mingyuan Xu",
       comment: "Huzz."
-    }
-  ],
-  redFlags: [
+    },
     {
       id: "red1",
+      type: "red",
       date: new Date("2024-04-10"),
       author: "Daniel Wang",
       comment: "She bullied me in high school and stole my lunch money!"
     },
     {
       id: "red2",
+      type: "red",
       date: new Date("2024-04-10"),
       author: "Mingyuan Xu",
       comment: "Chuzz."
     }
   ],
-  coi: [
-    {
-      id: "coi1",
-      date: new Date("2024-04-10"),
-      author: "Kevin He",
-      comment: "I was friends with this guy in high school."
-    },
-  ]
 }
 
 export type Feedback = {
@@ -128,7 +129,7 @@ export type Feedback = {
   date: Date
   author: string
   comment: string
-  score: number | null
+  score?: number | null
 }
 
 export type Application = {

@@ -16,7 +16,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { z } from "zod"
 import { schema } from "../table/data-table"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Application, Feedback, Question, Questions, dummyData } from "./dummy-data"
+import { Application, Feedback, Flag, Question, Questions, dummyData } from "./dummy-data"
 import { useState } from "react"
 import { CircleAlertIcon, ClipboardIcon, FileTextIcon, FlagIcon, SendIcon, ThumbsUpIcon, UserIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -92,7 +92,37 @@ const FeedbackBlock = ({ feedback }: { feedback: Feedback }) => {
       </div>
       <p className="text-sm">{feedback.comment}</p>
     </div>
+  )
+}
 
+// TODO: this one Feedback (above) are essentially the same thing
+const FlagBlock = ({ flag }: { flag: Flag }) => {
+  return (
+    <>
+      {flag.type === "green" ? (
+        <div className="bg-green-50 text-green-800 dark:bg-green-900/20 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="text-xs">{getInitials(flag.author)}</AvatarFallback>
+            </Avatar>
+            <span className="font-medium text-sm">{flag.author}</span>
+            <span className="text-xs text-muted-foreground ml-auto">2 days ago</span>
+          </div>
+          <p className="text-sm">{flag.comment}</p>
+        </div>
+      ) : (
+        <div className="bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="text-xs">{getInitials(flag.author)}</AvatarFallback>
+            </Avatar>
+            <span className="font-medium text-sm">{flag.author}</span>
+            <span className="text-xs text-muted-foreground ml-auto">2 days ago</span>
+          </div>
+          <p className="text-sm">{flag.comment}</p>
+        </div>
+      )}
+    </>
   )
 }
 /* -------------------------------------------------------------------------- */
@@ -100,7 +130,7 @@ const FeedbackBlock = ({ feedback }: { feedback: Feedback }) => {
 export default function ApplicationViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
   
-  const { zid, name, email, applications, diversity, recommendations, redFlags, coi } = dummyData;
+  const { zid, name, email, applications, diversity, flags } = dummyData;
   const { gender, education, degree, student_type, year } = diversity;
   const [application, setApplication] = useState<Application>(applications[0]);
 
@@ -257,7 +287,7 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
                     </div>
                     <Button className="w-full">
                       <SendIcon />
-                      Add Comment
+                      Add Feedback
                     </Button>
                   </CardContent>
                 </Card>
@@ -330,6 +360,59 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
           <TabsContent value="review" className="space-y-4">
             <ScrollArea className="h-[calc(90vh-180px)]">
               <div className="space-y-4">
+                {/* Flags:
+                  TODO:
+                    - refactor this to reduce code repetition
+                    - also make sure looks good when flags.length === 0
+                */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <FlagIcon className="h-5 w-5 text-green-500" />
+                        <span>Green Flags</span>
+                      </CardTitle>
+                      <CardContent className="px-0 space-y-2">
+                        {flags.filter(flag => flag.type === "green").length <= 0 ? (
+                          <div className="text-muted-foreground text-sm">No comments yet.</div>
+                        ) : (
+                          <>
+                            {flags.filter(flag => flag.type === "green").map((flag) => {
+                              return (
+                                <div key={flag.id} className="space-y-1">
+                                  <FlagBlock flag={flag as Flag} />
+                                </div>
+                              )
+                            })}
+                          </>
+                        )}
+                      </CardContent>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <FlagIcon className="h-5 w-5 text-red-500" />
+                        <span>Red Flags</span>
+                      </CardTitle>
+                      <CardContent className="px-0 space-y-2">
+                        {flags.filter(flag => flag.type === "red").length <= 0 ? (
+                          <div className="text-muted-foreground text-sm">No comments yet.</div>
+                        ) : (
+                          <>
+                            {flags.filter(flag => flag.type === "red").map((flag) => {
+                              return (
+                                <div key={flag.id} className="space-y-1">
+                                  <FlagBlock flag={flag as Flag} />
+                                </div>
+                              )
+                            })}
+                          </>
+                        )}
+                      </CardContent>
+                    </CardHeader>
+                  </Card>
+                </div>
                 {/* Other portfolios */}
                 <Card>
                   <CardHeader>
@@ -355,77 +438,6 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
                       </div>
                     </CardContent>
                   </CardHeader>
-                </Card>
-                {/* Recommendations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Flags</CardTitle>
-                    <CardDescription>Recommendations, red flags, and COI</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Red Flags */}
-                      <div>
-                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
-                          <FlagIcon className="h-5 w-5 text-red-500" />
-                          Red Flags
-                        </h3>
-                        {redFlags.length > 0 ? (
-                          <div className="space-y-2">
-                              {redFlags.map((comment) => (
-                                <div key={comment.id} className="bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-200 p-3 rounded-md text-base flex flex-col space-y-1">
-                                  <span className="font-bold text-sm">{comment.author}</span>
-                                  <span>{comment.comment}</span>
-                                  {/* <span>{comment.date}</span> */}
-                                </div>
-                              ))}
-                          </div>
-                        ) : (
-                          <div className="text-muted-foreground text-base">No red flags identified.</div>
-                        )}
-                      </div>
-
-                      {/* Green Flags / Recommendations */}
-                      <div>
-                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
-                          <ThumbsUpIcon className="h-5 w-5 text-green-500" />
-                          Recommendations
-                        </h3>
-                        {recommendations.length > 0 ? (
-                          <div className="space-y-2">
-                            {recommendations.map((comment) => (
-                              <div key={comment.id} className="bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-200 p-3 rounded-md text-base flex flex-col space-y-1">
-                                  <span className="font-bold text-sm">{comment.author}</span>
-                                  <span>{comment.comment}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-muted-foreground text-base">No recommendations yet.</div>
-                        )}
-                      </div>
-
-                      {/* Conflicts of Interest */}
-                      <div>
-                        <h3 className="text-base font-medium mb-2 flex items-center gap-2">
-                          <CircleAlertIcon className="h-5 w-5 text-yellow-500" />
-                          Conflicts of Interest
-                        </h3>
-                        {coi.length > 0  ? (
-                          <div className="space-y-2">
-                            {coi.map((comment) => (
-                              <div key={comment.id} className="bg-yellow-50 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200 p-3 rounded-md text-base flex flex-col space-y-1">
-                                  <span className="font-bold text-sm">{comment.author}</span>
-                                  <span>{comment.comment}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-muted-foreground text-base">No conflicts of interest declared.</div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
                 </Card>
               </div>
             </ScrollArea>
