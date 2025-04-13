@@ -1,16 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart, Sector } from "recharts"
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import type { PieSectorDataItem } from "recharts/types/polar/Pie"
 import { cn } from "@/lib/utils"
+
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+import { Label, Pie, PieChart, Sector } from "recharts"
+import type { PieSectorDataItem } from "recharts/types/polar/Pie"
+import { Check, ChevronsUpDown } from "lucide-react"
 
 const chartData = [
   { portfolio: "careers", applicants: 142, fill: "var(--color-careers)" },
@@ -33,7 +34,7 @@ const chartConfig = {
     color: "oklch(63.7% 0.237 25.331)", // red-500
   },
   competitions: {
-    label: "Comps",
+    label: "Competitions",
     color: "oklch(70.5% 0.213 47.604)", // orange-500
   },
   creative: {
@@ -78,14 +79,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ApplicantsByPortfolio() {
+export function SmallChartApplicants({ className }: { className?: string }) {
+  // TODO: set active portfolio based on logged in director
+  const [activePortfolio, setActivePortfolio] = React.useState<string>("competitions")
+  const [open, setOpen] = React.useState(false)
+
   const totalApplicants = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.applicants, 0)
   }, [])
-
-  const [activePortfolio, setActivePortfolio] = React.useState<string>("all")
-  const [open, setOpen] = React.useState(false)
-
   const activeIndex = React.useMemo(() => {
     if (activePortfolio === "all") return -1;
     return chartData.findIndex((item) => item.portfolio === activePortfolio)
@@ -109,28 +110,28 @@ export function ApplicantsByPortfolio() {
   }
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Applicants by Portfolio</CardTitle>
-        <CardDescription>Number of applicants per portfolio</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <div className="flex justify-end">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-[180px] justify-between text-sm font-normal"
-              >
+    <Card className={cn("flex flex-col gap-0 pb-0", className)}>
+      <CardHeader className="flex items-start space-y-0">
+        <div className="grid gap-1">
+          <CardTitle>Applicants</CardTitle>
+          <CardDescription>By portfolio</CardDescription>
+        </div>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="ml-auto w-[150px] justify-between"
+            >
+              <div className="flex items-center gap-2 text-xs font-normal">
                 {activePortfolio === "all" ? (
-                  <div className="flex items-center gap-2 text-xs">
+                  <>
                     <span className="flex h-3 w-3 shrink-0 rounded-sm bg-muted-foreground" />
-                    All Portfolios
-                  </div>
+                    All portfolios
+                  </>
                 ) : (
-                  <div className="flex items-center gap-2 text-xs">
+                  <>
                     <span
                       className="flex h-3 w-3 shrink-0 rounded-sm"
                       style={{
@@ -138,72 +139,74 @@ export function ApplicantsByPortfolio() {
                       }}
                     />
                     {chartConfig[activePortfolio as keyof typeof chartConfig]?.label || activePortfolio}
-                  </div>
+                  </>
                 )}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[180px] p-0" align="end">
-              <Command>
-                <CommandInput placeholder="Search portfolio..." />
-                <CommandList>
-                  <CommandEmpty>No portfolio found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => {
-                        setActivePortfolio("all")
-                        setOpen(false)
-                      }}
-                      className="text-xs"
-                    >
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="flex h-3 w-3 shrink-0 rounded-sm bg-muted-foreground" />
-                        All Portfolios
-                      </div>
-                      <Check className={cn("ml-auto h-4 w-4", activePortfolio === "all" ? "opacity-100" : "opacity-0")} />
-                    </CommandItem>
-                    {portfolios
-                      .filter((p) => p !== "all")
-                      .map((portfolio) => {
-                        const config = chartConfig[portfolio as keyof typeof chartConfig]
-                        return (
-                          <CommandItem
-                            key={portfolio}
-                            value={portfolio}
-                            onSelect={() => {
-                              setActivePortfolio(portfolio)
-                              setOpen(false)
-                            }}
-                            className="text-xs"
-                          >
-                            <div className="flex items-center gap-2 text-xs">
-                              <span
-                                className="flex h-3 w-3 shrink-0 rounded-sm"
-                                style={{
-                                  backgroundColor: config?.color || "transparent",
-                                }}
-                              />
-                              {config?.label}
-                            </div>
-                            <Check
-                              className={cn(
-                                "ml-auto h-4 w-4",
-                                activePortfolio === portfolio ? "opacity-100" : "opacity-0",
-                              )}
+              </div>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[180px] p-0" align="end">
+            <Command>
+              <CommandInput placeholder="Search portfolio..." />
+              <CommandList>
+                <CommandEmpty>No portfolio found.</CommandEmpty>
+                <CommandGroup>
+                  <CommandItem
+                    value="all"
+                    onSelect={() => {
+                      setActivePortfolio("all")
+                      setOpen(false)
+                    }}
+                    className="text-xs"
+                  >
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="flex h-3 w-3 shrink-0 rounded-sm bg-muted-foreground" />
+                      All Portfolios
+                    </div>
+                    <Check className={cn("ml-auto h-4 w-4", activePortfolio === "all" ? "opacity-100" : "opacity-0")} />
+                  </CommandItem>
+                  {portfolios
+                    .filter((p) => p !== "all")
+                    .map((portfolio) => {
+                      const config = chartConfig[portfolio as keyof typeof chartConfig]
+                      return (
+                        <CommandItem
+                          key={portfolio}
+                          value={portfolio}
+                          onSelect={() => {
+                            setActivePortfolio(portfolio)
+                            setOpen(false)
+                          }}
+                          className="text-xs"
+                        >
+                          <div className="flex items-center gap-2 text-xs">
+                            <span
+                              className="flex h-3 w-3 shrink-0 rounded-sm"
+                              style={{
+                                backgroundColor: config?.color || "transparent",
+                              }}
                             />
-                          </CommandItem>
-                        )
-                      })}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
+                            {config?.label}
+                          </div>
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              activePortfolio === portfolio ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      )
+                    })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </CardHeader>
+      <CardContent>
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
           <PieChart>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line"/>} />
             <Pie
               data={chartData}
               dataKey="applicants"
@@ -211,7 +214,7 @@ export function ApplicantsByPortfolio() {
               innerRadius={60}
               strokeWidth={5}
               paddingAngle={2}
-              cornerRadius={4}
+              cornerRadius={2}
               activeIndex={activeIndex !== -1 ? activeIndex : undefined}
               activeShape={({ outerRadius = 0, ...props }: PieSectorDataItem) => (
                 <g>
@@ -220,6 +223,7 @@ export function ApplicantsByPortfolio() {
                 </g>
               )}
               onClick={handlePieClick}
+              className="cursor-pointer"
             >
               <Label
                 content={({ viewBox }) => {
@@ -241,16 +245,6 @@ export function ApplicantsByPortfolio() {
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          {activePortfolio === "all"
-            ? "Showing data for all portfolios."
-            : `Showing data for ${chartConfig[activePortfolio as keyof typeof chartConfig]?.label || activePortfolio}.`}
-        </div>
-      </CardFooter>
     </Card>
   )
 }

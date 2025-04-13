@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ModeToggle } from "../mode-toggle"
 import { useTheme } from "next-themes"
+import Link from "next/link"
 
 export function NavUser({
   user,
@@ -132,9 +133,11 @@ export function NavUser({
               </DropdownMenuSub>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOutIcon />
-              Log out
+            <DropdownMenuItem asChild>
+              <Link href="/">
+                <LogOutIcon />
+                Log out
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

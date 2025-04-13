@@ -1,4 +1,4 @@
-import { ApplicantsByPortfolio } from "./charts/applicantsByPortfolio";
+// import { ApplicantsByPortfolio } from "../../../components/charts/small-charts/small-chart-applicants";
 import { ApplicationStatusChart } from "./charts/applicationStatusChart";
 import { DiversityCharts } from "./charts/diversityCharts";
 
@@ -12,7 +12,7 @@ export default function AnalyticsPage() {
         </p>
 
         <div className="bg-red-50 grid grid-cols-3 gap-4">
-          <ApplicantsByPortfolio />
+          {/* <ApplicantsByPortfolio /> */}
           <DiversityCharts />
           <ApplicationStatusChart />
         </div>

@@ -187,14 +187,14 @@ export function ApplicationStatusChart() {
                 </Pie>
               </PieChart>
             </ChartContainer>
-            <CardFooter className="flex-col gap-2 text-sm">
+            {/* <CardFooter className="flex-col gap-2 text-sm">
               <div className="flex items-center gap-2 font-medium leading-none">
                 Acceptance rate: {(totalAccepted / totalApplicants * 100).toFixed(1)}%
               </div>
               <div className="leading-none text-muted-foreground">
                 Showing data for all portfolios.
               </div>
-            </CardFooter>
+            </CardFooter> */}
           </TabsContent>
         </Tabs>
       </CardContent>
