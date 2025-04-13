@@ -66,7 +66,7 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
 
   return (
     <Card className={cn("flex flex-col gap-0 pb-0", className)}>
-      <CardHeader className="flex items-start space-y-0">
+      <CardHeader className="flex items-start space-y-0 truncate">
         <div className="grid gap-1">
           <CardTitle>Statuses</CardTitle>
           <CardDescription>{selectedPortfolio === "specific" ? (
