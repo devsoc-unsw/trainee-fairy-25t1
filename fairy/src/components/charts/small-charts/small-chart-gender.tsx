@@ -50,7 +50,7 @@ export function SmallChartGenderRatio({ className }: { className?: string }) {
   }, [selectedPortfolio]);
 
   const activeIndex = React.useMemo(() => {
-    if (!activeGender) return -1;
+    if (!activeGender) return null;
     return chartData.findIndex((item) => item.gender === activeGender);
   }, [selectedPortfolio, activeGender]);
 
@@ -120,7 +120,7 @@ export function SmallChartGenderRatio({ className }: { className?: string }) {
               strokeWidth={5}
               paddingAngle={2}
               cornerRadius={2}
-              activeIndex={activeIndex !== -1 ? activeIndex : undefined}
+              activeIndex={activeIndex ?? undefined}
               activeShape={({ outerRadius = 0, ...props }: PieSectorDataItem) => (
                 <g>
                   <Sector {...props} outerRadius={outerRadius + 10} />

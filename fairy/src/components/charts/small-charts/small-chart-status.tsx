@@ -43,7 +43,7 @@ const chartConfig = {
 
 export function SmallChartApplicationStatus({ className }: { className?: string }) {
   const [selectedPortfolio, setSelectedPortfolio] = React.useState("specific");
-  const [activeStatus, setActiveStatus] = React.useState<string>("pending");
+  const [activeStatus, setActiveStatus] = React.useState<string | null>("pending");
 
   const chartData = React.useMemo(() => {
     return selectedPortfolio === "specific" ? rawDataPortfolioSpecific : rawData;
@@ -55,13 +55,21 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
   }, [selectedPortfolio, activeStatus]);
 
   const selectedTotal = React.useMemo(() => {
+    if (!activeStatus) return chartData.find((data) => data.status === "accepted")?.applicants || 0;
     return chartData.find((data) => data.status === activeStatus)?.applicants || 0; 
   }, [selectedPortfolio, activeStatus]);
 
-  const onClick = (data: { status: React.SetStateAction<string> }) => {
-    if (!data || !data.status) return;
+  const totalApplicants = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.applicants, 0)
+  }, [selectedPortfolio]);
 
-    setActiveStatus(data.status);
+  const onClick = (data: { status: React.SetStateAction<string | null> }) => {
+    if (!data || !data.status) return;
+    if (data.status === activeStatus) {
+      setActiveStatus(null);
+    } else {
+      setActiveStatus(data.status);
+    }
   }
 
   return (
@@ -125,21 +133,42 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
                         textAnchor="middle"
                         dominantBaseline="middle"
                       >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {selectedTotal}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground text-xs"
-                        >
-                          {/* using js to capitalise cos tailwind class doesn't work for some reason */}
-                          {activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}
-                        </tspan>
+                        {!activeStatus ? (
+                          <>
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {(selectedTotal / totalApplicants * 100).toFixed(1)}%
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground"
+                            >
+                              Acceptance rate
+                            </tspan>
+                          </>
+                        ) : (
+                          <>
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-3xl font-bold"
+                            >
+                              {selectedTotal}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 24}
+                              className="fill-muted-foreground text-xs"
+                            >
+                              {/* using js to capitalise cos tailwind class doesn't work for some reason */}
+                              {activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}
+                            </tspan>
+                          </>
+                        )}
                       </text>
                     )
                   }
