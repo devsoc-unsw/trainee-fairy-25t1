@@ -14,18 +14,18 @@ import type { PieSectorDataItem } from "recharts/types/polar/Pie"
 import { Check, ChevronsUpDown } from "lucide-react"
 
 const chartData = [
-  { portfolio: "careers", applicants: 142, fill: "var(--color-careers)" },
-  { portfolio: "competitions", applicants: 55, fill: "var(--color-competitions)" },
-  { portfolio: "creative", applicants: 39, fill: "var(--color-creative)" },
-  { portfolio: "digital", applicants: 32, fill: "var(--color-digital)" },
-  { portfolio: "education", applicants: 74, fill: "var(--color-education)" },
-  { portfolio: "events", applicants: 86, fill: "var(--color-events)" },
-  { portfolio: "hr", applicants: 95, fill: "var(--color-hr)" },
-  { portfolio: "it", applicants: 78, fill: "var(--color-it)" },
-  { portfolio: "marketing", applicants: 78, fill: "var(--color-marketing)" },
-  { portfolio: "media", applicants: 60, fill: "var(--color-media)" },
-  { portfolio: "outreach", applicants: 73, fill: "var(--color-outreach)" },
-  { portfolio: "socials", applicants: 69, fill: "var(--color-socials)" },
+  { portfolio: "careers", applications: 142, fill: "var(--color-careers)" },
+  { portfolio: "competitions", applications: 55, fill: "var(--color-competitions)" },
+  { portfolio: "creative", applications: 39, fill: "var(--color-creative)" },
+  { portfolio: "digital", applications: 32, fill: "var(--color-digital)" },
+  { portfolio: "education", applications: 74, fill: "var(--color-education)" },
+  { portfolio: "events", applications: 86, fill: "var(--color-events)" },
+  { portfolio: "hr", applications: 95, fill: "var(--color-hr)" },
+  { portfolio: "it", applications: 78, fill: "var(--color-it)" },
+  { portfolio: "marketing", applications: 78, fill: "var(--color-marketing)" },
+  { portfolio: "media", applications: 60, fill: "var(--color-media)" },
+  { portfolio: "outreach", applications: 73, fill: "var(--color-outreach)" },
+  { portfolio: "socials", applications: 69, fill: "var(--color-socials)" },
 ]
 
 const chartConfig = {
@@ -79,13 +79,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function SmallChartApplicants({ className }: { className?: string }) {
+export function SmallChartApplicantions({ className }: { className?: string }) {
   // TODO: set active portfolio based on logged in director
   const [activePortfolio, setActivePortfolio] = React.useState<string>("competitions")
   const [open, setOpen] = React.useState(false)
 
   const totalApplicants = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.applicants, 0)
+    return chartData.reduce((acc, curr) => acc + curr.applications, 0)
   }, [])
   const activeIndex = React.useMemo(() => {
     if (activePortfolio === "all") return -1;
@@ -95,7 +95,7 @@ export function SmallChartApplicants({ className }: { className?: string }) {
   const portfolioTotal = React.useMemo(() => {
     if (activePortfolio === "all") return totalApplicants
     const index = chartData.findIndex((item) => item.portfolio === activePortfolio)
-    return index >= 0 ? chartData[index].applicants : totalApplicants
+    return index >= 0 ? chartData[index].applications : totalApplicants
   }, [activePortfolio, totalApplicants])
 
   // Handle pie sector click
@@ -113,7 +113,7 @@ export function SmallChartApplicants({ className }: { className?: string }) {
     <Card className={cn("flex flex-col gap-0 pb-0", className)}>
       <CardHeader className="flex items-start space-y-0">
         <div className="grid gap-1">
-          <CardTitle>Applicants</CardTitle>
+          <CardTitle>Applications</CardTitle>
           <CardDescription>By portfolio</CardDescription>
         </div>
         <Popover open={open} onOpenChange={setOpen}>
@@ -209,7 +209,7 @@ export function SmallChartApplicants({ className }: { className?: string }) {
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line"/>} />
             <Pie
               data={chartData}
-              dataKey="applicants"
+              dataKey="applications"
               nameKey="portfolio"
               innerRadius={60}
               strokeWidth={5}
@@ -234,7 +234,7 @@ export function SmallChartApplicants({ className }: { className?: string }) {
                           {portfolioTotal.toLocaleString()}
                         </tspan>
                         <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground select-none">
-                          Applicants
+                          Applications
                         </tspan>
                       </text>
                     )
