@@ -208,7 +208,7 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="application" className="container">
+          <TabsContent value="application">
             <ResizablePanelGroup
               direction="horizontal"
             >
@@ -296,8 +296,8 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
           </TabsContent>
 
           <TabsContent value="profile">
-            <ScrollArea className="h-[calc(90vh-180px)] space-y-4">
-              <div className="space-y-4">
+            <ScrollArea className="h-[calc(90vh-180px)]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {/* General info */}
                 <Card>
                   <CardHeader>
@@ -353,66 +353,66 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
                     </div>
                   </CardContent>
                 </Card>
+
               </div>
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="review" className="space-y-4">
+          <TabsContent value="review">
             <ScrollArea className="h-[calc(90vh-180px)]">
-              <div className="space-y-4">
-                {/* Flags:
-                  TODO:
-                    - refactor this to reduce code repetition
-                    - also make sure looks good when flags.length === 0
-                */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <FlagIcon className="h-5 w-5 text-green-500" />
-                        <span>Green Flags</span>
-                      </CardTitle>
-                      <CardContent className="px-0 space-y-2">
-                        {flags.filter(flag => flag.type === "green").length <= 0 ? (
-                          <div className="text-muted-foreground text-sm">No comments yet.</div>
-                        ) : (
-                          <>
-                            {flags.filter(flag => flag.type === "green").map((flag) => {
-                              return (
-                                <div key={flag.id} className="space-y-1">
-                                  <FlagBlock flag={flag as Flag} />
-                                </div>
-                              )
-                            })}
-                          </>
-                        )}
-                      </CardContent>
-                    </CardHeader>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <FlagIcon className="h-5 w-5 text-red-500" />
-                        <span>Red Flags</span>
-                      </CardTitle>
-                      <CardContent className="px-0 space-y-2">
-                        {flags.filter(flag => flag.type === "red").length <= 0 ? (
-                          <div className="text-muted-foreground text-sm">No comments yet.</div>
-                        ) : (
-                          <>
-                            {flags.filter(flag => flag.type === "red").map((flag) => {
-                              return (
-                                <div key={flag.id} className="space-y-1">
-                                  <FlagBlock flag={flag as Flag} />
-                                </div>
-                              )
-                            })}
-                          </>
-                        )}
-                      </CardContent>
-                    </CardHeader>
-                  </Card>
-                </div>
+              {/* Flags:
+                TODO:
+                  - refactor this to reduce code repetition
+                  - also make sure looks good when flags.length === 0
+              */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FlagIcon className="h-5 w-5 text-green-500" />
+                      <span>Green Flags</span>
+                    </CardTitle>
+                    <CardContent className="px-0 space-y-2">
+                      {flags.filter(flag => flag.type === "green").length <= 0 ? (
+                        <div className="text-muted-foreground text-sm">No comments yet.</div>
+                      ) : (
+                        <>
+                          {flags.filter(flag => flag.type === "green").map((flag) => {
+                            return (
+                              <div key={flag.id} className="space-y-1">
+                                <FlagBlock flag={flag as Flag} />
+                              </div>
+                            )
+                          })}
+                        </>
+                      )}
+                    </CardContent>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FlagIcon className="h-5 w-5 text-red-500" />
+                      <span>Red Flags</span>
+                    </CardTitle>
+                    <CardContent className="px-0 space-y-2">
+                      {flags.filter(flag => flag.type === "red").length <= 0 ? (
+                        <div className="text-muted-foreground text-sm">No comments yet.</div>
+                      ) : (
+                        <>
+                          {flags.filter(flag => flag.type === "red").map((flag) => {
+                            return (
+                              <div key={flag.id} className="space-y-1">
+                                <FlagBlock flag={flag as Flag} />
+                              </div>
+                            )
+                          })}
+                        </>
+                      )}
+                    </CardContent>
+                  </CardHeader>
+                </Card>
+
                 {/* Other portfolios */}
                 <Card>
                   <CardHeader>
@@ -440,6 +440,8 @@ export default function ApplicationViewer({ item }: { item: z.infer<typeof schem
                   </CardHeader>
                 </Card>
               </div>
+
+              {/* TODO: add section for application  */}
             </ScrollArea>
           </TabsContent>
         </Tabs>
