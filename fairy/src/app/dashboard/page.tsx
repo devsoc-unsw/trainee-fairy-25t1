@@ -1,4 +1,4 @@
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { ApplicationsPerDayChart } from "@/components/charts/chart-applications-per-day"
 import { DataTable } from "@/components/table/data-table"
 
 import data from "./data.json"
@@ -15,7 +15,7 @@ export default function Page() {
         <SmallChartGenderRatio className="hidden @5xl/main:block"/>
       </div>
       <div className="px-4 lg:px-6">
-        <ChartAreaInteractive />
+        <ApplicationsPerDayChart />
       </div>
       <DataTable data={data} />
     </div>
