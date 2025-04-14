@@ -77,7 +77,7 @@ const data = {
     },
     {
       title: "Analytics",
-      url: "/dashboard/analytics",
+      url: "/analytics",
       icon: BarChartIcon,
     },
   ],

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import TailwindBreakpointIndicator from "@/components/tailwind-breakpoint-indicator";
 import { Toaster } from "@/components/ui/sonner";
+import { ConditionalLayout } from "@/components/conditional-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* TODO: remove before prod */}
+        <script
+          crossOrigin="anonymous"
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overscroll-none`}
       >
@@ -36,9 +44,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TailwindBreakpointIndicator /> {/* TODO: remove this before prod */}
+          <TailwindBreakpointIndicator /> {/* TODO: remove before prod */}
           <Toaster />
-          {children}
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </ThemeProvider>
       </body>
     </html>
