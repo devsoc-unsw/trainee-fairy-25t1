@@ -39,23 +39,19 @@ const data = {
     name: "Lebron James",
     role: "Competitions Director",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
   },
   teams: [
     {
       name: "CSESoc",
       logo: Terminal,
-      plan: "Enterprise",
     },
     {
       name: "DevSoc",
       logo: Code,
-      plan: "Startup",
     },
     {
       name: "CompClub",
       logo: Laptop,
-      plan: "Free",
     },
   ],
   navMain: [

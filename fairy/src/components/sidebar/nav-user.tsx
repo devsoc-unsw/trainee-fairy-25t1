@@ -36,7 +36,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ModeToggle } from "../mode-toggle"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 
@@ -47,7 +46,7 @@ export function NavUser({
     name: string
     email: string
     role: string
-    avatar: string
+    avatar?: string
   }
 }) {
   const { isMobile } = useSidebar();
