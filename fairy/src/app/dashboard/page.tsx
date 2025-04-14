@@ -13,9 +13,7 @@ export default function Page() {
         <SmallChartApplicantions />
         <SmallChartApplicationStatus />
         <SmallChartGenderRatio className="hidden @5xl/main:block"/>
-      </div>
-      <div className="px-4 lg:px-6">
-        <ApplicationsPerDayChart />
+        <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
       </div>
       <DataTable data={data} />
     </div>

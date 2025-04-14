@@ -3,9 +3,9 @@
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
-import { useIsMobile } from "@/hooks/use-mobile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { cn } from "@/lib/utils"
 
 const chartData = [
   { date: "2024-04-01", applications: 222 },
@@ -78,13 +78,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ApplicationsPerDayChart() {
+export function ApplicationsPerDayChart({ className }: { className?: string }) {
   const totalApplications = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.applications, 0)
   }, [chartData]);
 
   return (
-    <Card className="@container/card">
+    <Card className={cn("@container/card", className)}>
       <CardHeader className="flex items-center">
         <div className="grid gap-1">
           <CardTitle>Recruitment Metrics</CardTitle>
