@@ -1,9 +1,16 @@
-"use client";
+"use client"
+import { ApplicationsPerDayChart } from "@/components/charts/chart-applications-per-day"
+import { DataTable } from "@/components/table/data-table"
+
+import data from "./data.json"
+import { SmallChartApplicantions } from "@/components/charts/small-charts/small-chart-applications"
+import { SmallChartApplicationStatus } from "@/components/charts/small-charts/small-chart-status"
+import { SmallChartGenderRatio } from "@/components/charts/small-charts/small-chart-gender"
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Dashboard() {
+export default function Page() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +39,7 @@ export default function Dashboard() {
         setDisplayName(userDisplayName);
       } catch (error) {
         console.error("Error loading dashboard:", error);
-        router.push("/login");
+        router.push("/auth");
       } finally {
         setLoading(false);
       }
@@ -41,21 +48,6 @@ export default function Dashboard() {
     fetchUserData();
   }, [router]);
 
-  const handleSignOut = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/logout", {
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        router.push("/auth");
-      } else {
-        console.error("Failed to logout");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -66,26 +58,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-lg w-full p-8 bg-white shadow-lg rounded-md">
-        <h1 className="text-3xl font-semibold text-center text-gray-800 mb-4">Dashboard</h1>
-        {displayName ? (
-          <div className="text-center text-xl text-gray-700">
-            <p>Welcome, <span className="font-semibold">{displayName}</span>!</p>
-            <p className="mt-4 text-gray-500">This is your dashboard.</p>
-            <button
-              onClick={handleSignOut}
-              className="mt-6 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : (
-          <div className="text-center text-xl text-gray-700">
-            <p>User not found.</p>
-          </div>
-        )}
+    <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6">
+      <div className="@2xl/main:grid-cols-2 @5xl/main:grid-cols-3 grid grid-cols-1 gap-4 px-4 lg:px-6">
+        <SmallChartApplicantions />
+        <SmallChartApplicationStatus />
+        <SmallChartGenderRatio className="hidden @5xl/main:block"/>
+        <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
       </div>
+      <DataTable data={data} />
     </div>
-  );
+  )
 }
