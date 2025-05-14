@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+<<<<<<< HEAD
 import { ThemeProvider } from "@/components/theme-provider";
 import TailwindBreakpointIndicator from "@/components/tailwind-breakpoint-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { ConditionalLayout } from "@/components/conditional-layout";
+=======
+>>>>>>> 40770f9cd01849d4382d0560c559018ba6fb5539
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+<<<<<<< HEAD
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* TODO: remove before prod */}
@@ -50,6 +54,13 @@ export default function RootLayout({
             {children}
           </ConditionalLayout>
         </ThemeProvider>
+=======
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+>>>>>>> 40770f9cd01849d4382d0560c559018ba6fb5539
       </body>
     </html>
   );
