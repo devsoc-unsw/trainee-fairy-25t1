@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation" // ✅ App Router import
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,10 +17,11 @@ interface LoginFormValues {
 }
 
 interface LoginFormProps {
-  onSuccess: () => void
+  onSuccess?: () => void // Make it optional just in case
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -40,15 +42,20 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setError(null)
 
     try {
-      // Here you would implement your actual login logic
-      console.log("Login data:", data)
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Login failed")
 
-      onSuccess()
-    } catch (err) {
-      setError("Invalid email or password. Please try again.")
+      onSuccess?.() // Call the callback if provided
+      router.push(`/dashboard?displayName=${encodeURIComponent(result.displayName)}`) // ✅ Navigate to dashboard
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setIsLoading(false)
     }

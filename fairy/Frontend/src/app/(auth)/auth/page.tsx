@@ -20,7 +20,7 @@ export default function AuthPage() {
         className="w-full max-w-md overflow-hidden rounded-xl bg-white p-6 shadow-lg"
       >
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-slate-800">Welcome</h1>
+          <h1 className="text-2xl font-bold text-slate-800">RecruitMe</h1>
           <p className="text-slate-500">Sign in to continue to your account</p>
         </div>
 

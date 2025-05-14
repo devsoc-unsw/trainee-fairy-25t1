@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -23,6 +22,7 @@ interface SignUpFormProps {
 export function SignUpForm({ onSuccess }: SignUpFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const {
     register,
@@ -40,17 +40,22 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
   const onSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true)
     setError(null)
+    setSuccessMessage(null)
 
     try {
-      // Here you would implement your actual signup logic
-      console.log("Signup data:", data)
+      const response = await fetch("http://localhost:3000/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Signup failed")
 
+      setSuccessMessage("Check your email for the confirmation link.")
       onSuccess()
-    } catch (err) {
-      setError("An error occurred during sign up. Please try again.")
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setIsLoading(false)
     }
@@ -62,6 +67,13 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert variant="default" className="mb-4 bg-green-100 border border-green-400 text-green-800">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -124,6 +136,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
         />
         {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
       </div>
+
       {errors.terms && <p className="text-xs text-red-500">{errors.terms.message}</p>}
 
       <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white" disabled={isLoading}>
