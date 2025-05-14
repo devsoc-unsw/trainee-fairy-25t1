@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # TODO:
 
 ### HEADER:
@@ -32,7 +31,6 @@
 - [ ] make login/signup windows pop up/scroll within the matter-js canvas
 - [ ] maybe still need a section navigation (i.e. about, mission, our team, contact, etc.)
   - [x] [awwwards side menu](https://www.youtube.com/watch?v=MsdR8iAscNs)
-=======
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -69,4 +67,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
->>>>>>> 40770f9cd01849d4382d0560c559018ba6fb5539
