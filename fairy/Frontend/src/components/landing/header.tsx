@@ -6,7 +6,7 @@ export default function Header() {
       <span className="font-bold text-2xl tracking-tighter select-none">recruit.me</span>
       <div className="flex items-center space-x-2">
         <AnimatedLink
-          href="#"
+          href="/auth"
           text="Sign up"
           textClassName="font-semibold select-none"
           className="rounded-full px-4"
@@ -14,7 +14,7 @@ export default function Header() {
           duration={0.25}
         />
         <AnimatedLink
-          href="#"
+          href="/auth"
           text="Log in"
           textClassName="font-semibold select-none text-primary-foreground"
           className="bg-primary hover:bg-primary/90 rounded-full px-4"
