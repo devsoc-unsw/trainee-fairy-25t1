@@ -18,7 +18,7 @@ export default function Page() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch("http://localhost:3000/protected/dashboard", {
+        const res = await fetch("http://localhost:3000/dashboard/protected/dashboard", {
           credentials: "include", // Important to send cookies
         });
 

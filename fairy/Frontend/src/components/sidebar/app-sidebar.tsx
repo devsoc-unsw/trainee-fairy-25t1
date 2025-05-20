@@ -25,56 +25,23 @@ import {
 } from "@/components/ui/sidebar"
 import { TeamSwitcher } from "./team-switcher"
 import { NavDivisions } from "./nav-divisions"
-import { Button } from "@/components/ui/button" // Make sure you import your button component
+import { Button } from "@/components/ui/button"
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 const data = {
-  user: {
-    name: "Lebron James",
-    role: "Competitions Director",
-    email: "m@example.com",
-  },
   teams: [
-    {
-      name: "CSESoc",
-      logo: Terminal,
-    },
-    {
-      name: "DevSoc",
-      logo: Code,
-    },
-    {
-      name: "CompClub",
-      logo: Laptop,
-    },
+    { name: "CSESoc", logo: Terminal },
+    { name: "DevSoc", logo: Code },
+    { name: "CompClub", logo: Laptop },
   ],
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Applications",
-      url: "#",
-      icon: FileTextIcon,
-    },
-    {
-      title: "Interviews",
-      url: "#",
-      icon: Calendar,
-    },
-    {
-      title: "Applicants",
-      url: "#",
-      icon: UsersIcon,
-    },
-    {
-      title: "Analytics",
-      url: "/analytics",
-      icon: BarChartIcon,
-    },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
+    { title: "Applications", url: "#", icon: FileTextIcon },
+    { title: "Interviews", url: "#", icon: Calendar },
+    { title: "Applicants", url: "#", icon: UsersIcon },
+    { title: "Analytics", url: "/analytics", icon: BarChartIcon },
   ],
   divisions: [
     {
@@ -111,22 +78,42 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const router = useRouter();
+  const router = useRouter()
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/users/me", {
+          credentials: "include",
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setUser({ name: data.user.user_metadata.first_name + " " + data.user.user_metadata.last_name, email: data.user.email , role: "Director"  });
+          console.log(data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch user", err)
+      } 
+    }
+
+    fetchUser()
+  }, [router])
+
   const handleSignOut = async () => {
     try {
-      const res = await fetch("http://localhost:3000/logout", {
+      const res = await fetch("http://localhost:3000/auth/logout", {
         credentials: "include",
-      });
-
+      })
       if (res.ok) {
-        router.push("/auth");
+        router.push("/auth")
       } else {
-        console.error("Failed to logout");
+        console.error("Failed to logout")
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error)
     }
-  };
+  }
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -138,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavDivisions divisions={data.divisions} />
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
         <Button variant="outline" size="sm" onClick={handleSignOut}>
           Logout
         </Button>

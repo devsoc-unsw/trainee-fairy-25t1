@@ -9,10 +9,17 @@ import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface SignUpFormValues {
-  name: string
+  first_name: string
+  last_name: string
   email: string
   password: string
   terms: boolean
+  student_id: string
+  degree: string
+  gender: "male" | "female" | "other"
+  study_year: number
+  is_pg: boolean
+  is_intl: boolean
 }
 
 interface SignUpFormProps {
@@ -30,10 +37,17 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
     formState: { errors },
   } = useForm<SignUpFormValues>({
     defaultValues: {
-      name: "",
+      first_name: "",
+      last_name: "",
       email: "",
       password: "",
       terms: false,
+      student_id: "",
+      degree: "",
+      gender: "other",
+      study_year: 1,
+      is_pg: false,
+      is_intl: false,
     },
   })
 
@@ -43,10 +57,23 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
     setSuccessMessage(null)
 
     try {
-      const response = await fetch("http://localhost:3000/signup", {
+      const response = await fetch("http://localhost:3000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email, password: data.password }),
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          data: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            student_id: data.student_id,
+            degree: data.degree,
+            gender: data.gender,
+            study_year: data.study_year,
+            is_pg: data.is_pg,
+            is_intl: data.is_intl,
+          },
+        }),
       })
 
       const result = await response.json()
@@ -78,34 +105,37 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="name" className="text-sm font-medium">
-          Full Name
-        </Label>
+        <Label htmlFor="first_name">First Name</Label>
         <Input
-          id="name"
+          id="first_name"
           type="text"
-          placeholder="John Doe"
-          className="h-10"
-          {...register("name", {
-            required: "Name is required",
-            minLength: {
-              value: 2,
-              message: "Name must be at least 2 characters",
-            },
+          placeholder="John"
+          {...register("first_name", {
+            required: "First name is required",
           })}
         />
-        {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+        {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">
-          Email
-        </Label>
+        <Label htmlFor="last_name">Last Name</Label>
+        <Input
+          id="last_name"
+          type="text"
+          placeholder="Doe"
+          {...register("last_name", {
+            required: "Last name is required",
+          })}
+        />
+        {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
           placeholder="you@example.com"
-          className="h-10"
           {...register("email", {
             required: "Email is required",
             pattern: {
@@ -118,26 +148,77 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">
-          Password
-        </Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
           placeholder="••••••••"
-          className="h-10"
           {...register("password", {
             required: "Password is required",
-            minLength: {
-              value: 8,
-              message: "Password must be at least 8 characters",
-            },
+            minLength: { value: 8, message: "Password must be at least 8 characters" },
           })}
         />
         {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
       </div>
 
-      {errors.terms && <p className="text-xs text-red-500">{errors.terms.message}</p>}
+      <div className="space-y-2">
+        <Label htmlFor="student_id">Student ID</Label>
+        <Input
+          id="student_id"
+          type="text"
+          placeholder="e.g. z1234567"
+          {...register("student_id", { required: "Student ID is required" })}
+        />
+        {errors.student_id && <p className="text-xs text-red-500">{errors.student_id.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="degree">Degree</Label>
+        <Input
+          id="degree"
+          type="text"
+          placeholder="Computer Science"
+          {...register("degree", { required: "Degree is required" })}
+        />
+        {errors.degree && <p className="text-xs text-red-500">{errors.degree.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender</Label>
+        <select
+          id="gender"
+          className="w-full h-10 border rounded px-2"
+          {...register("gender", { required: "Gender is required" })}
+        >
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+        {errors.gender && <p className="text-xs text-red-500">{errors.gender.message}</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="study_year">Year of Study</Label>
+        <Input
+          id="study_year"
+          type="number"
+          {...register("study_year", {
+            required: "Study year is required",
+            min: { value: 1, message: "Minimum is 1" },
+          })}
+        />
+        {errors.study_year && <p className="text-xs text-red-500">{errors.study_year.message}</p>}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input type="checkbox" id="is_pg" {...register("is_pg")} />
+        <Label htmlFor="is_pg">Postgraduate student</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input type="checkbox" id="is_intl" {...register("is_intl")} />
+        <Label htmlFor="is_intl">International student</Label>
+      </div>
 
       <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white" disabled={isLoading}>
         {isLoading ? "Creating account..." : "Create account"}
