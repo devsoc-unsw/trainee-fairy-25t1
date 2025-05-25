@@ -55,4 +55,44 @@ router.get("/protected/applications/:driveId", authenticateUser, async(req: Requ
     });
 });
 
+// Update application status
+router.post("/protected/applications/status", authenticateUser, async (req: Request, res: Response) => {
+    const user = req.user;
+    const { id: applicationId, status } = req.body;
+
+    if (!user || !applicationId || !status) {
+        res.status(400).json({ error: "User, Application ID and Status are required" });
+        return;
+    }
+
+    console.log(applicationId, status)
+
+    // TODO: need to make sure the user is a director of the portfolio the application belongs to
+    // // Check if the application belongs to the user
+    // const { data: application, error: appError } = await supabase
+    //     .from('applications')
+    //     .select('*')
+    //     .eq('id', applicationId)
+    //     .eq('user_id', user.id)
+    //     .single();
+
+    // if (appError || !application) {
+    //     res.status(403).json({ error: "Forbidden: You do not have access to this application" });
+    //     return;
+    // }
+
+    // Update the status of the application
+    const { error: updateError } = await supabase
+        .from('applications')
+        .update({ status })
+        .eq('id', applicationId);
+
+    if (updateError) {
+        res.status(500).json({ error: updateError.message });
+        return;
+    }
+
+    res.status(200).json({ message: "Application status updated successfully" });
+});
+
 export default router;

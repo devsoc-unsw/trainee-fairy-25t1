@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Calendar, Users, BookOpen, Megaphone, AlertCircle, ArrowLeft, SquareArrowOutUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 // TypeScript interfaces
 interface Society {
