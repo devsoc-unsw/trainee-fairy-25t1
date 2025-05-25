@@ -30,10 +30,24 @@ router.get("/societies/:id", authenticateUser, async (req: Request, res: Respons
   res.status(200).json({ society });
 });
 
-router.get("/portfolios/:id", authenticateUser, async (req: Request, res: Response) => {
-  const { driveId } = req.params;
+router.get("/drives/:id", authenticateUser, async (req: Request, res: Response) => {
+  const { id: driveId } = req.params;
 
-  let { data: portfolio, error } = await supabase
+  let { data: drive, error } = await supabase
+    .from('drives')
+    .select('*')
+    .eq('id', driveId)
+    .single();
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  }
+  res.status(200).json({ drive });
+});
+
+router.get("/portfolios/:driveId", authenticateUser, async (req: Request, res: Response) => {
+  const { driveId } = req.params;
+  let { data: portfolios, error } = await supabase
     .from('portfolios')
     .select('*')
     .eq('drive', driveId);
@@ -41,7 +55,7 @@ router.get("/portfolios/:id", authenticateUser, async (req: Request, res: Respon
   if (error) {
     res.status(500).json({ error: error.message });
   }
-  res.status(200).json({ portfolio });
+  res.status(200).json({ portfolios });
 });
 
 
