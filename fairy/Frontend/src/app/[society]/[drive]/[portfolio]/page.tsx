@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, BookOpen, Megaphone, AlertCircle, ArrowLeft, CheckCircle, Loader2 } from "lucide-react"
+import { Calendar, Users, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
 
 // TypeScript interfaces
 interface Society {
@@ -160,27 +160,12 @@ const ApplicationPage = () => {
     return `${minCapacity}-${maxCapacity} people`
   }
 
-  const getPortfolioIcon = (name: string) => {
-    switch (name.toLowerCase()) {
-      case "education":
-        return <BookOpen className="h-6 w-6" />
-      case "marketing":
-        return <Megaphone className="h-6 w-6" />
-      default:
-        return <Users className="h-6 w-6" />
-    }
-  }
-
   const isRecruitmentOpen = () => {
     if (!drive) return false
     const now = new Date()
     const openDate = new Date(drive.open_date)
     const closeDate = new Date(drive.close_date)
     return now >= openDate && now <= closeDate
-  }
-
-  const handleBackClick = () => {
-    window.history.back()
   }
 
   const onSubmit = async (data: FormData) => {
