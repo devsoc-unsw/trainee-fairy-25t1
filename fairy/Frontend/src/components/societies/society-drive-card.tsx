@@ -33,7 +33,7 @@ const DriveCard: React.FC<Props> = ({ drive, href }) => {
       pathname: `${href}`,
       query: { society_id: drive.s_id, drive_id: drive.d_id }
     }}>
-      <Card className="w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 group">
+      <Card className="w-full h-full overflow-hidden border-2 shadow-lg hover:shadow-xl transition-all duration-300 group">
         <CardHeader className="flex items-center space-x-3">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
             <img
@@ -43,8 +43,8 @@ const DriveCard: React.FC<Props> = ({ drive, href }) => {
             />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">{drive.s_name}</h2>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 font-medium">
+            <h2 className="text-lg font-semibold">{drive.s_name}</h2>
+            <Badge variant="secondary" className="bg-blue-100 text-black font-medium">
               {drive.alias}
             </Badge>
           </div>
@@ -52,7 +52,7 @@ const DriveCard: React.FC<Props> = ({ drive, href }) => {
 
         <CardContent className="space-y-6">
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-gray-900 group-hover:text-blue-500 transition-color duration-300">
+            <div className="flex items-center gap-2 group-hover:text-blue-500 transition-color duration-300">
               <Users className="w-5 h-5" />
               <h1 className="text-xl font-bold leading-tight ">{drive.d_name}</h1>
             </div>
