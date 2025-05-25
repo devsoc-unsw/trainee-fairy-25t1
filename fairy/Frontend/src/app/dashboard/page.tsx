@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  // const [displayName, setDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,9 +34,11 @@ export default function Page() {
         }
 
         const data = await res.json();
+
+        console.log(data)
         const userEmail = data.user?.email;
-        const userDisplayName = data.user?.user_metadata?.display_name || userEmail;
-        setDisplayName(userDisplayName);
+        // const userDisplayName = data.user?.user_metadata?.display_name || userEmail;
+        // setDisplayName(userDisplayName);
       } catch (error) {
         console.error("Error loading dashboard:", error);
         router.push("/auth");
@@ -46,7 +48,7 @@ export default function Page() {
     };
 
     fetchUserData();
-  }, [router]);
+  }, []);
 
 
   if (loading) {

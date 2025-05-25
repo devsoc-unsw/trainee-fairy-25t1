@@ -12,5 +12,7 @@ router.get("/me", authenticateUser, (req: Request, res: Response) => {
   res.status(200).json({ user });
 });
 
+
+
 export default router;
 

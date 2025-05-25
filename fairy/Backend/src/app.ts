@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import { createClient, User } from "@supabase/supabase-js";
 import bodyParser from "body-parser";
@@ -8,6 +8,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth"
 import dashboardRoutes from "./routes/dashboard"
 import userRoutes from "./routes/users"
+import applyRoutes from "./routes/apply"
 
 dotenv.config();
 const app = express();
@@ -39,6 +40,7 @@ app.use(express.static("public"));
 app.use("/auth", authRoutes)
 app.use("/dashboard", dashboardRoutes)
 app.use("/users", userRoutes)
+app.use("/apply", applyRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

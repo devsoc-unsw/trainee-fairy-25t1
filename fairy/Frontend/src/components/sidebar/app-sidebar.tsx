@@ -42,6 +42,7 @@ const data = {
     { title: "Interviews", url: "#", icon: Calendar },
     { title: "Applicants", url: "#", icon: UsersIcon },
     { title: "Analytics", url: "/analytics", icon: BarChartIcon },
+    { title: "Test", url: "/test", icon: BarChartIcon },
   ],
   divisions: [
     {
