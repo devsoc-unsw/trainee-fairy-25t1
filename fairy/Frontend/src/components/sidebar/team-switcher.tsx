@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { ChevronsUpDown, Plus } from "lucide-react"
 
@@ -21,14 +19,17 @@ import {
 
 export function TeamSwitcher({
   teams,
+  activeTeam,
+  onChange,
 }: {
   teams: {
     name: string
     logo: React.ElementType
   }[]
+  activeTeam: { name: string; logo: React.ElementType }
+  onChange: (team: { name: string; logo: React.ElementType }) => void
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
 
   if (!activeTeam) {
     return null
@@ -47,9 +48,7 @@ export function TeamSwitcher({
                 <activeTeam.logo className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {activeTeam.name}
-                </span>
+                <span className="truncate font-semibold">{activeTeam.name}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -60,13 +59,11 @@ export function TeamSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
-            </DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Teams</DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}
-                onClick={() => setActiveTeam(team)}
+                onClick={() => onChange(team)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
