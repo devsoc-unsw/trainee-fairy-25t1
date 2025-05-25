@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -47,6 +48,7 @@ const Page = () => {
   const searchParams = useSearchParams()
   const societyId = searchParams.get("society_id")
   const driveId = searchParams.get("drive_id")
+  const router = useRouter()
 
   const [society, setSociety] = useState<Society | null>(null)
   const [drive, setDrive] = useState<Drive | null>(null)
@@ -80,6 +82,13 @@ const Page = () => {
             credentials: "include",
           }),
         ])
+
+        if (societyResponse.status === 401) {
+          setError("You must be logged in to view this page.")
+          setLoading(false)
+          router.push("/auth")
+          return
+        }
 
         if (!societyResponse.ok || !driveResponse.ok || !portfoliosResponse.ok) {
           throw new Error("Failed to fetch data")

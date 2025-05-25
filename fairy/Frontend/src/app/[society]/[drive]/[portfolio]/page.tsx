@@ -2,6 +2,8 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -58,6 +60,7 @@ interface Question {
 type FormData = Record<string, string>
 
 const ApplicationPage = () => {
+  const router = useRouter()
   const searchParams = useSearchParams()
 
   const societyId = searchParams.get("society_id")
@@ -106,6 +109,13 @@ const ApplicationPage = () => {
             credentials: "include",
           }),
         ])
+
+        if (societyResponse.status === 401) {
+          setError("You must be logged in to view this page.")
+          setLoading(false)
+          router.push("/auth")
+          return
+        }
 
         if (!societyResponse.ok || !driveResponse.ok || !portfolioResponse.ok || !questionsResponse.ok) {
           throw new Error("Failed to fetch data")
