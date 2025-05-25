@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation";
 
-import { useForm } from "react-hook-form"
+import { set, useForm } from "react-hook-form"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
+import { toast } from "sonner";
 
 // TypeScript interfaces
 interface Society {
@@ -66,21 +67,26 @@ const ApplicationPage = () => {
   const societyId = searchParams.get("society_id")
   const driveId = searchParams.get("drive_id")
   const portfolioId = searchParams.get("portfolio_id")
+  const applicationId = searchParams.get("application_id")
 
   const [society, setSociety] = useState<Society | null>(null)
   const [drive, setDrive] = useState<Drive | null>(null)
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
-  const [questions, setQuestions] = useState<Question[]>([])
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    getValues,
   } = useForm<FormData>()
 
   useEffect(() => {
@@ -95,7 +101,7 @@ const ApplicationPage = () => {
         setLoading(true)
         setError(null)
 
-        const [societyResponse, driveResponse, portfolioResponse, questionsResponse] = await Promise.all([
+        const [societyResponse, driveResponse, portfolioResponse, questionsResponse, applicationResponse, answersResponse] = await Promise.all([
           fetch(`http://localhost:3000/apply/society/${societyId}`, {
             credentials: "include",
           }),
@@ -108,6 +114,12 @@ const ApplicationPage = () => {
           fetch(`http://localhost:3000/apply/questions/${portfolioId}`, {
             credentials: "include",
           }),
+          fetch(`http://localhost:3000/apply/application/status/${applicationId}`, {
+            credentials: "include",
+          }),
+          fetch(`http://localhost:3000/apply/answers/${applicationId}`, {
+            credentials: "include",
+          }),
         ])
 
         if (societyResponse.status === 401) {
@@ -117,21 +129,28 @@ const ApplicationPage = () => {
           return
         }
 
-        if (!societyResponse.ok || !driveResponse.ok || !portfolioResponse.ok || !questionsResponse.ok) {
+        if (!societyResponse.ok || !driveResponse.ok || !portfolioResponse.ok || !questionsResponse.ok ||!applicationResponse.ok || !answersResponse.ok) {
           throw new Error("Failed to fetch data")
         }
 
-        const [societyData, driveData, portfolioData, questionsData] = await Promise.all([
+        const [societyData, driveData, portfolioData, questionsData, applicationData, answersData] = await Promise.all([
           societyResponse.json(),
           driveResponse.json(),
           portfolioResponse.json(),
           questionsResponse.json(),
+          applicationResponse.json(),
+          answersResponse.json(),
         ])
 
         setSociety(societyData.society)
         setDrive(driveData.drive)
         setPortfolio(portfolioData.portfolio)
         setQuestions(questionsData.questions.sort((a: Question, b: Question) => a.order_index - b.order_index))
+        setAnswers(answersData.answers || [])
+
+        if (applicationData.status === "submitted") {
+          setSubmitted(true)
+        }
       } catch (error) {
         console.error("Error fetching data:", error)
         setError("Failed to load application form. Please try again later.")
@@ -141,7 +160,7 @@ const ApplicationPage = () => {
     }
 
     fetchData()
-  }, [societyId, driveId, portfolioId])
+  }, [societyId, driveId, portfolioId, applicationId])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-AU", {
@@ -171,36 +190,39 @@ const ApplicationPage = () => {
   const onSubmit = async (data: FormData) => {
     try {
       setSubmitting(true)
-
+      console.log(data)
       // Transform form data to include question IDs
       const answers = questions.map((question) => ({
         question_id: question.id,
-        answer: data[question.id] || "",
+        answer: data[question.id]
       }))
 
-      const submissionData = {
-        portfolio_id: portfolioId,
-        answers,
+      const response = await fetch("http://localhost:3000/apply/answers/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          applicationId: applicationId,
+          answers,
+          isFinalSubmission: true,
+        }),
+      })
+
+      const result = await response.json()
+      console.log("Submission result:", result)
+      if (result.error) {
+        throw new Error(result.error)
       }
-      console.log(JSON.stringify(submissionData, null, 2))
-      // const response = await fetch("http://localhost:3000/apply/submit", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   credentials: "include",
-      //   body: JSON.stringify(submissionData),
-      // })
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to submit application")
-      // }
-
+      if (!response.ok) {
+        throw new Error("Failed to submit application")
+      }
       setSubmitted(true)
       reset()
     } catch (error) {
       console.error("Error submitting application:", error)
-      setError("Failed to submit application. Please try again.")
+      setError(`${error}}`)
     } finally {
       setSubmitting(false)
     }
@@ -208,6 +230,8 @@ const ApplicationPage = () => {
 
   const renderQuestionField = (question: Question) => {
     const isLongText = question.label.length > 100 || question.description
+
+    const existingAnswer = answers.find((answer: any) => answer.question === question.id)?.answer || ""
 
     return (
       <div key={question.id} className="space-y-2">
@@ -220,6 +244,7 @@ const ApplicationPage = () => {
           <Textarea
             id={question.id}
             placeholder="Enter your response..."
+            defaultValue={existingAnswer}
             className="min-h-[100px]"
             {...register(question.id, {
               required: question.is_required ? "This field is required" : false,
@@ -229,6 +254,7 @@ const ApplicationPage = () => {
           <Input
             id={question.id}
             placeholder="Enter your response..."
+            defaultValue={existingAnswer}
             {...register(question.id, {
               required: question.is_required ? "This field is required" : false,
             })}
@@ -237,6 +263,49 @@ const ApplicationPage = () => {
         {errors[question.id] && <p className="text-sm text-red-500">{errors[question.id]?.message}</p>}
       </div>
     )
+  }
+
+  const handleSaveDraft = async () => {
+    try {
+      setSaving(true)
+  
+      const currentValues = getValues()
+  
+      const draftAnswers = questions.map((question) => ({
+        question_id: question.id,
+        answer: currentValues[question.id] || "",
+      }))
+  
+      const response = await fetch("http://localhost:3000/apply/answers/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          applicationId,
+          answers: draftAnswers,
+          isFinalSubmission: false,
+        }),
+      })
+  
+      const result = await response.json()
+      if (!response.ok || result.error) {
+        throw new Error(result.error || "Failed to save draft")
+      }
+  
+      // Optionally notify the user
+      console.log("Draft saved successfully.")
+      toast.success("Draft saved successfully.", {
+        description: "Your application draft has been saved.",
+        duration: 3000,
+      })
+    } catch (error) {
+      console.error("Error saving draft:", error)
+      setError(`${error}`)
+    } finally {
+      setSaving(false)
+    }
   }
 
   // Loading state
@@ -325,7 +394,6 @@ const ApplicationPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-4xl mx-auto space-y-8">
-
         {/* Application Header */}
         <Card>
           <CardHeader>
@@ -356,11 +424,11 @@ const ApplicationPage = () => {
             <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
-                Opens: {formatDate(drive.open_date)}
+                Opens: {formatDate(portfolio.open_date ?? drive.open_date)}
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
-                Closes: {formatDate(drive.close_date)}
+                Closes: {formatDate(portfolio.close_date ?? drive.close_date)}
               </div>
             </div>
             <div className="mt-4">
@@ -379,8 +447,29 @@ const ApplicationPage = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {questions.map(renderQuestionField)}
 
-              <div className="flex justify-end pt-6 border-t">
-                <Button type="submit" disabled={submitting || !isRecruitmentOpen()} className="min-w-[120px]">
+              <div className="flex justify-end gap-4 pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  disabled={saving}
+                  className="min-w-[120px]"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Draft"
+                  )}
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={submitting || !isRecruitmentOpen()}
+                  className="min-w-[120px]"
+                >
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />

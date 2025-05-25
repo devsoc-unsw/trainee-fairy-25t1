@@ -159,7 +159,36 @@ const Page = () => {
     window.history.back()
   }
 
-  const formatLink = (s_alias: string, d_name: string, p_name: string) => {
+  const handleApplyClick = async () => {
+    const getOrCreateApplcation = async (portfolioId: string) => {
+      const response = await fetch(`http://localhost:3000/apply/application/${portfolioId}`, {
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create application");
+      }
+      const data = await response.json();
+      return data.application;
+    }
+
+    if (!selectedPortfolio || !drive || !society) return;
+    try {
+      const { id: applicationId } = await getOrCreateApplcation(selectedPortfolio.id);
+      console.log(applicationId)
+
+      const link = `http://localhost:3001/${society.alias}/${formatLink(drive.name, selectedPortfolio.name)}?society_id=${society.id}&drive_id=${drive.id}&portfolio_id=${selectedPortfolio.id}&application_id=${applicationId}`;
+      window.open(link, "_blank", "noopener,noreferrer");
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creating application:", error);
+      alert("Failed to create application. Please try again later.");
+    }
+  }
+    
+
+  const formatLink = (d_name: string, p_name: string) => {
     return `${d_name.toLowerCase().replace(/\s+/g, '-')}/${p_name.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
@@ -393,21 +422,9 @@ const Page = () => {
                 <div className="flex justify-end pt-4 border-t">
                   <Button
                     className="bg-primary hover:bg-primary/90"
-                    asChild
+                    onClick={handleApplyClick}
                   >
-                    <Link href={{
-                      pathname: formatLink(society.alias, drive.name, selectedPortfolio.name),
-                      query: {
-                        society_id: society.id,
-                        drive_id: drive.id,
-                        portfolio_id: selectedPortfolio.id,
-                      },
-                    }}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    >
-                      Apply
-                      <SquareArrowOutUpRight className="ml-1 h-4 w-4" /></Link>
+                    Apply <SquareArrowOutUpRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               </div>
