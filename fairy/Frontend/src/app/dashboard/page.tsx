@@ -1,18 +1,16 @@
 "use client"
 import { ApplicationsPerDayChart } from "@/components/charts/chart-applications-per-day"
-import { DataTable } from "@/components/table/data-table"
 
-import data from "./data.json"
 import { SmallChartApplicantions } from "@/components/charts/small-charts/small-chart-applications"
 import { SmallChartApplicationStatus } from "@/components/charts/small-charts/small-chart-status"
 import { SmallChartGenderRatio } from "@/components/charts/small-charts/small-chart-gender"
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ApplicationsTable } from "@/components/table/applications-table"
 
 export default function Page() {
   const router = useRouter();
-  // const [displayName, setDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export default function Page() {
         <SmallChartGenderRatio className="hidden @5xl/main:block"/>
         <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
       </div>
-      <DataTable data={data} />
+      <ApplicationsTable/>
     </div>
   )
 }
