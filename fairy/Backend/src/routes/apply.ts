@@ -12,6 +12,7 @@ router.get("/drives", authenticateUser, async (req: Request, res: Response) => {
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ drives });
 });
@@ -28,6 +29,7 @@ router.get("/society/:id", authenticateUser, async (req: Request, res: Response)
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ society });
 });
@@ -58,6 +60,7 @@ router.get("/portfolios/:driveId", authenticateUser, async (req: Request, res: R
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ portfolios });
 });
