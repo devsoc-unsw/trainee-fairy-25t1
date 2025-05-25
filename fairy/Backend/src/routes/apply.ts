@@ -248,7 +248,7 @@ router.post("/answers/submit", authenticateUser, async (req: Request, res: Respo
   if (isFinalSubmission) {
     const { data, error } = await supabase
       .from('applications')
-      .update({ submitted_at: new Date() })
+      .update({ submitted_at: new Date(), status: 'pending' })
       .eq('id', applicationId)
       .select()
       .single();
