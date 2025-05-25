@@ -18,25 +18,8 @@ return;
   const userId = req.user.id;
   console.log("User ID:", userId);
 
-      // 2) Get all portfolio → drive_id for portfolios this user directs
-      const { data: rows, error: dirErr } = await supabase
-        .from("portfolios")
-        .select("drive, directors(portfolio)")
-        .eq("directors.user_id", userId);
-
-      if (dirErr) {
-        console.error("Error fetching director portfolios:", dirErr);
-        res.status(500).json({ error: dirErr.message });
-        return;
-      }
-
-      const driveIds = rows!.map((r) => r.drive);
-
-      // 3) Now grab from your view, only those d_id in driveIds
-      const { data: drives, error } = await supabase
-        .from("society_drives")
-        .select("*")
-        .in("d_id", driveIds);
+const { data: drives, error } = await supabase
+  .rpc('get_director_drives', { uid: userId });
 
       if (error) {
         console.error("Error fetching drives:", error);
