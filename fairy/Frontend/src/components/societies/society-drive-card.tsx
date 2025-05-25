@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge"
 
 interface Props {
   drive: Drive;
+  href: string;
 }
 
-const DriveCard: React.FC<Props> = ({ drive }) => {
+const DriveCard: React.FC<Props> = ({ drive, href }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-AU", {
@@ -27,13 +28,9 @@ const DriveCard: React.FC<Props> = ({ drive }) => {
     return now >= openDate && now <= closeDate
   }
 
-  const formatLink = (s_alias: string, d_name: string) => {
-    return `${s_alias.toLowerCase().replace(/\s+/g, '-')}/${d_name.toLowerCase().replace(/\s+/g, '-')}`;
-  }
-
   return (
     <Link href={{
-      pathname: `${formatLink(drive.alias, drive.d_name)}`,
+      pathname: `${href}`,
       query: { society_id: drive.s_id, drive_id: drive.d_id }
     }}>
       <Card className="w-full h-full overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 group">
@@ -89,5 +86,6 @@ const DriveCard: React.FC<Props> = ({ drive }) => {
     </Link>
   );
 };
+
 
 export default DriveCard;

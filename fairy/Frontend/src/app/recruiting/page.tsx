@@ -52,6 +52,9 @@ const Page = () => {
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
+  const formatLink = (s_alias: string, d_name: string) => {
+    return `/${s_alias.toLowerCase().replace(/\s+/g, '-')}/${d_name.toLowerCase().replace(/\s+/g, '-')}`;
+  }
 
   return (
     <div >
@@ -67,7 +70,7 @@ const Page = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {drives.map((drive) => (
-                <DriveCard key={drive.d_id} drive={drive} />
+                <DriveCard key={drive.d_id} drive={drive} href={formatLink(drive.alias, drive.d_name)} />
               ))}
             </div>
           </div>
