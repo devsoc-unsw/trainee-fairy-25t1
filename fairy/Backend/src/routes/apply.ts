@@ -11,6 +11,7 @@ router.get("/drives", authenticateUser, async (req: Request, res: Response) => {
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ drives });
 });
@@ -26,6 +27,7 @@ router.get("/societies/:id", authenticateUser, async (req: Request, res: Respons
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ society });
 });
@@ -40,6 +42,7 @@ router.get("/portfolios/:id", authenticateUser, async (req: Request, res: Respon
 
   if (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
   res.status(200).json({ portfolio });
 });
