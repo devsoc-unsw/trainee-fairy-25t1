@@ -70,10 +70,10 @@ const Page = () => {
         setError(null)
 
         const [societyResponse, driveResponse, portfoliosResponse] = await Promise.all([
-          fetch(`http://localhost:3000/apply/societies/${societyId}`, {
+          fetch(`http://localhost:3000/apply/society/${societyId}`, {
             credentials: "include",
           }),
-          fetch(`http://localhost:3000/apply/drives/${driveId}`, {
+          fetch(`http://localhost:3000/apply/drive/${driveId}`, {
             credentials: "include",
           }),
           fetch(`http://localhost:3000/apply/portfolios/${driveId}`, {
@@ -151,7 +151,7 @@ const Page = () => {
   }
 
   const formatLink = (s_alias: string, d_name: string, p_name: string) => {
-    return `${s_alias.toLowerCase().replace(/\s+/g, '-')}/${d_name.toLowerCase().replace(/\s+/g, '-')}/${p_name.toLowerCase().replace(/\s+/g, '-')}`;
+    return `${d_name.toLowerCase().replace(/\s+/g, '-')}/${p_name.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
   // Loading state

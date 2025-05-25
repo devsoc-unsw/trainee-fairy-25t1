@@ -4,6 +4,7 @@ import supabase from "../app";
 
 const router = Router();
 
+// Gets all societies and their drives
 router.get("/drives", authenticateUser, async (req: Request, res: Response) => {
   let { data: drives, error } = await supabase
     .from('society_drives')
@@ -15,7 +16,8 @@ router.get("/drives", authenticateUser, async (req: Request, res: Response) => {
   res.status(200).json({ drives });
 });
 
-router.get("/societies/:id", authenticateUser, async (req: Request, res: Response) => {
+// Gets details of a specific society
+router.get("/society/:id", authenticateUser, async (req: Request, res: Response) => {
   const { id: societyId } = req.params;
 
   let { data: society, error } = await supabase
@@ -30,7 +32,8 @@ router.get("/societies/:id", authenticateUser, async (req: Request, res: Respons
   res.status(200).json({ society });
 });
 
-router.get("/drives/:id", authenticateUser, async (req: Request, res: Response) => {
+// Gets details of a specific drive
+router.get("/drive/:id", authenticateUser, async (req: Request, res: Response) => {
   const { id: driveId } = req.params;
 
   let { data: drive, error } = await supabase
@@ -45,6 +48,7 @@ router.get("/drives/:id", authenticateUser, async (req: Request, res: Response) 
   res.status(200).json({ drive });
 });
 
+// Gets all portfolios for a specific drive
 router.get("/portfolios/:driveId", authenticateUser, async (req: Request, res: Response) => {
   const { driveId } = req.params;
   let { data: portfolios, error } = await supabase
@@ -58,6 +62,37 @@ router.get("/portfolios/:driveId", authenticateUser, async (req: Request, res: R
   res.status(200).json({ portfolios });
 });
 
+// Gets details of a specific portfolio
+router.get("/portfolio/:portfolioId", authenticateUser, async (req: Request, res: Response) => {
+  const { portfolioId } = req.params;
+
+  let { data: portfolio, error } = await supabase
+    .from('portfolios')
+    .select('*')
+    .eq('id', portfolioId)
+    .single();
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  }
+  res.status(200).json({ portfolio });
+});
+
+// Gets all questions for a specific portfolio
+router.get("/questions/:portfolioId", authenticateUser, async (req: Request, res: Response) => {
+  const { portfolioId } = req.params;
+
+  let { data: questions, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('portfolio', portfolioId)
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  }
+  res.status(200).json({ questions });
+});
 
 export default router;
 
