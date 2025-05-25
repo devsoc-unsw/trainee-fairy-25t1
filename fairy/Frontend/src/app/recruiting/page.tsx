@@ -58,12 +58,12 @@ const Page = () => {
 
   return (
     <div >
-      <main className="bg-foreground">
+      <main className="bg-[#0a0a0a]">
         <div className="bg-background min-h-screen rounded-b-4xl">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Currently recruiting...</h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <h1 className="text-4xl font-bold mb-4">Currently recruiting...</h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Discover amazing opportunities to get involved and make your mark on campus. Join a society that matches
                 your interests and ambitions.
               </p>

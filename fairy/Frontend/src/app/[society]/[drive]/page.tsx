@@ -263,7 +263,7 @@ const Page = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Back Button */}
         <Button variant="ghost" onClick={handleBackClick} className="flex items-center space-x-2 mb-4">

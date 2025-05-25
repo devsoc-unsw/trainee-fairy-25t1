@@ -95,7 +95,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           <Label htmlFor="password" className="text-sm font-medium">
             Password
           </Label>
-          <a href="#" className="text-xs text-violet-600 hover:text-violet-700 hover:underline">
+          <a href="#" className="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-500 dark:hover:text-violet-400 hover:underline">
             Forgot password?
           </a>
         </div>
@@ -131,7 +131,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-white px-2 text-slate-500">Or continue with</span>
+          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
         </div>
       </div>
 

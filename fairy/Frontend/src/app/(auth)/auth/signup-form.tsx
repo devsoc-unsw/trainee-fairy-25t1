@@ -150,7 +150,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
           <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-white px-2 text-slate-500">Or continue with</span>
+          <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
         </div>
       </div>
 

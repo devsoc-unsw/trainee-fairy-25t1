@@ -311,7 +311,7 @@ const ApplicationPage = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-4xl mx-auto space-y-8">
           <Skeleton className="h-10 w-20" />
           <Card>
@@ -345,7 +345,7 @@ const ApplicationPage = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="border-red-200">
             <CardContent className="flex items-center space-x-4 p-6">
@@ -364,7 +364,7 @@ const ApplicationPage = () => {
   // Success state
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="border-green-200">
             <CardContent className="flex flex-col items-center space-y-4 p-8 text-center">
@@ -392,7 +392,7 @@ const ApplicationPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Application Header */}
         <Card>
