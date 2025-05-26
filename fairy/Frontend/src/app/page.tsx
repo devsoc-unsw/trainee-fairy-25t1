@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { ModeToggle } from "@/components/mode-toggle"
 import ColourfulText from "@/components/ui/colourful-text"
 import AnimatedMenuButton from "@/components/landing/animated-menu-button"
+import { set } from "react-hook-form"
 
 const ScrollIndicator = () => {
   return (
@@ -39,6 +40,7 @@ export default function LandingPage() {
   const engineRef = useRef<Matter.Engine | null>(null)
   const parentRef = (engine: Matter.Engine) => engineRef.current = engine;
   const [debug, setDebug] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
 
   const createRandomObject = () => {
     if (!engineRef.current) return;
@@ -104,6 +106,33 @@ export default function LandingPage() {
     })
   }
 
+
+  // check if user logged in
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/users/check", {
+          credentials: "include", // Important to send cookies
+        });
+        if (res.status === 401) {
+          setUser(null);
+        } else {
+          const data = await res.json();
+          setUser({
+            name: `${data.user.user_metadata.first_name} ${data.user.user_metadata.last_name}`,
+            email: data.user.email,
+            role: data.user.role || "user", // Default to 'user' if no role is set
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // Redirect to login if there's an error
+        window.location.href = "/auth";
+      }
+    };
+    fetchUser();
+  }, []); 
+
   // Shake objects when scroll to top
   useEffect(() => {
     const handleScroll = () => {
@@ -158,7 +187,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <Header />
+    <Header auth={!user} />
       <AnimatedMenuButton />
       <main className="bg-foreground">
         {/* HERO SECTION */}

@@ -53,7 +53,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       if (!response.ok) throw new Error(result.error || "Login failed")
 
       onSuccess?.() // Call the callback if provided
-      router.push('/dashboard')
+      router.push('/')
     } catch (err: any) {
       setError(err.message)
     } finally {
