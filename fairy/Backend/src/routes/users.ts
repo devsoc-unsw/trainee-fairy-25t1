@@ -4,6 +4,14 @@ import supabase from "../app";
 
 const router = Router();
 
+// i just want to check if the user is logged in
+router.get("/check", authenticateUser, (req: any, res: any) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  return res.status(200).json({ user: req.user });
+});
+
 router.get("/me", authenticateUser, async (req: any, res: any) => {
   if (!req.user) {
     return res.status(401).json({ error: "Unauthorized" });
