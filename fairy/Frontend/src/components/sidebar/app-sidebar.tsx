@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import RecruitmentDriveForm from "./recruitement-drive-form"
 
 const data = {
   navMain: [
@@ -35,16 +36,27 @@ const data = {
   ],
 }
 
+// Define the type for portfolio based on the image
+interface Portfolio {
+  id: string;
+  description: string | null;
+  max_capacity: number;
+  min_capacity: number;
+  name: string;
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter()
   const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
   const [societies, setSocieties] = useState<
-    { id: string; name: string; user_role: string; drives: any[] }[]
+    { id: string; name: string; user_role: string; drives: any[]; portfolios: Portfolio[] }[]
   >([])
 
   const [activeSociety, setActiveSociety] = useState<
-    { id: string; name: string; user_role: string; drives: any[] } | null
+    { id: string; name: string; user_role: string; drives: any[]; portfolios: Portfolio[] } | null
   >(null)
+
+  const [showNewDriveForm, setShowNewDriveForm] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -63,12 +75,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             role: "", // will update below
           })
 
-          setSocieties(data.societies)
+          // Ensure societies from the API also have a 'portfolios' property
+          // even if it's an empty array initially if the API doesn't provide it directly
+          const societiesWithPortfolios = data.societies.map((society: any) => ({
+            ...society,
+            portfolios: society.portfolios || [], // Add portfolios, default to empty array
+          }));
+          setSocieties(societiesWithPortfolios)
 
           // Set first society active by default
-          if (data.societies.length > 0) {
-            setActiveSociety(data.societies[0])
-            setUser((u) => (u ? { ...u, role: data.societies[0].user_role } : null))
+          if (societiesWithPortfolios.length > 0) {
+            setActiveSociety(societiesWithPortfolios[0])
+            setUser((u) => (u ? { ...u, role: societiesWithPortfolios[0].user_role } : null))
           }
         }
       } catch (err) {
@@ -105,48 +123,67 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     logo: Terminal,
   }))
 
+  // New drive form submit handler
+  const handleCreateDrive = (formData: { name: string; description: string }) => {
+    console.log("Create drive with", formData)
+
+    // Here you would call API to create the drive
+    // For demo, just close modal
+    setShowNewDriveForm(false)
+  }
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        {societies.length > 0 && activeSociety && (
-          <TeamSwitcher
-            teams={teamsForSwitcher}
-            activeTeam={{ name: activeSociety.name, logo: Terminal }}
-            onChange={(team) => {
-              const selected = societies.find((soc) => soc.name === team.name)
-              if (selected) setActiveSociety(selected)
-            }}
-          />
-        )}
-      </SidebarHeader>
+    <>
+      <Sidebar collapsible="offcanvas" {...props}>
+        <SidebarHeader>
+          {societies.length > 0 && activeSociety && (
+            <TeamSwitcher
+              teams={teamsForSwitcher}
+              activeTeam={{ name: activeSociety.name, logo: Terminal }}
+              onChange={(team) => {
+                const selected = societies.find((soc) => soc.name === team.name)
+                if (selected) setActiveSociety(selected)
+              }}
+            />
+          )}
+        </SidebarHeader>
 
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        {activeSociety && (
-          <>
-            <NavDrives drives={activeSociety.drives} />
-            <div className="px-3 pt-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full"
-                onClick={() =>
-                  router.push(`/societies/${activeSociety.id}/drives/new`)
-                }
-              >
-                + New Drive
-              </Button>
-            </div>
-          </>
-        )}
-      </SidebarContent>
+        <SidebarContent>
+          <NavMain items={data.navMain} />
+          {activeSociety && (
+            <>
+              <NavDrives drives={activeSociety.drives} />
+              <div className="px-3 pt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setShowNewDriveForm(true)}
+                >
+                  + New Drive
+                </Button>
+              </div>
+            </>
+          )}
+        </SidebarContent>
 
-      <SidebarFooter className="flex flex-col gap-2">
-        {user && <NavUser user={user} />}
-        <Button variant="outline" size="sm" onClick={handleSignOut}>
-          Logout
-        </Button>
-      </SidebarFooter>
-    </Sidebar>
+        <SidebarFooter className="flex flex-col gap-2">
+          {user && <NavUser user={user} />}
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
+            Logout
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Modal */}
+      {showNewDriveForm && (
+        <RecruitmentDriveForm
+          onClose={() => setShowNewDriveForm(false)}
+          // Pass the portfolios of the active society to the RecruitmentDriveForm
+          portfolios={activeSociety ? activeSociety.portfolios : []}
+          societyId={activeSociety ? activeSociety.id : "" }
+        />
+      )}
+    </>
   )
 }

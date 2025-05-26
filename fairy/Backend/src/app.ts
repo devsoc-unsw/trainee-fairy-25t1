@@ -9,6 +9,8 @@ import authRoutes from "./routes/auth"
 import dashboardRoutes from "./routes/dashboard"
 import userRoutes from "./routes/users"
 import applyRoutes from "./routes/apply"
+import driveRoutes from "./routes/drives"
+import portfolioRoutes from "./routes/portfolio"
 import markRoutes from "./routes/mark"
 import applicationRoutes from "./routes/application"
 
@@ -43,6 +45,8 @@ app.use("/auth", authRoutes)
 app.use("/dashboard", dashboardRoutes)
 app.use("/users", userRoutes)
 app.use("/apply", applyRoutes)
+app.use("/portfolio", portfolioRoutes)
+app.use("/drives", driveRoutes)
 app.use("/mark", markRoutes)
 app.use("/application", applicationRoutes)
 
