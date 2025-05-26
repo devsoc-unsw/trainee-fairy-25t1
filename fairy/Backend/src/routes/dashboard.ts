@@ -36,11 +36,11 @@ router.get("/protected/applications/:driveId", authenticateUser, async(req: Requ
         return;
     }
     console.log('Drives:', drives);
-    // check if driveid is in drives array
-    if (!drives || !drives.some((drive: any) => drive.d_id === driveId)) {
-        res.status(403).json({ error: "Forbidden: You do not have access to this drive" });
-        return;
-    }
+    // // check if driveid is in drives array
+    // if (!drives || !drives.some((drive: any) => drive.d_id === driveId)) {
+    //     res.status(403).json({ error: "Forbidden: You do not have access to this drive" });
+    //     return;
+    // }
 
     // Here you would typically fetch the applications for the user and driveId
     const { data: applications, error: fetchError } = await supabase.rpc('get_applications_table_by_drive', {did: driveId});
