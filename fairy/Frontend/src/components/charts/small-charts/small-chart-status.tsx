@@ -1,27 +1,17 @@
-
 "use client"
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { usePortfolioStatus } from "@/hooks/use-portfolio-status"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import { Label, Pie, PieChart, Sector } from "recharts"
-import { PieSectorDataItem } from "recharts/types/polar/Pie"
-
-const rawData = [
-  { status: "accepted", applicants: 457, fill: "var(--color-accepted)" },
-  { status: "rejected", applicants: 198, fill: "var(--color-rejected)" },
-  { status: "pending", applicants: 226, fill: "var(--color-pending)" },
-];
-
-const rawDataPortfolioSpecific = [
-  { status: "accepted", applicants: 46, fill: "var(--color-accepted)" },
-  { status: "rejected", applicants: 14, fill: "var(--color-rejected)" },
-  { status: "pending", applicants: 18, fill: "var(--color-pending)" },
-];
+import type { PieSectorDataItem } from "recharts/types/polar/Pie"
+import type { ChartStatusData } from "@/types/portfolio-status"
 
 const chartConfig = {
   applicants: {
@@ -39,37 +29,120 @@ const chartConfig = {
     label: "Pending",
     color: "oklch(76.9% 0.188 70.08)", // amber-500
   },
-} satisfies ChartConfig;
+  waitlisted: {
+    label: "Waitlisted",
+    color: "oklch(62.3% 0.214 259.815)", // blue-500
+  },
+} satisfies ChartConfig
 
 export function SmallChartApplicationStatus({ className }: { className?: string }) {
-  const [selectedPortfolio, setSelectedPortfolio] = React.useState("specific");
-  const [activeStatus, setActiveStatus] = React.useState<string | null>("pending");
+  const { data: portfolioData, isLoading, error } = usePortfolioStatus()
+  const [selectedPortfolio, setSelectedPortfolio] = React.useState("all")
+  const [activeStatus, setActiveStatus] = React.useState<string | null>(null) // Default to null for acceptance rate
 
-  const chartData = React.useMemo(() => {
-    return selectedPortfolio === "specific" ? rawDataPortfolioSpecific : rawData;
-  }, [selectedPortfolio]);
+  const chartData = React.useMemo((): ChartStatusData[] => {
+    if (!portfolioData.length) return []
+
+    if (selectedPortfolio === "all") {
+      // Aggregate all portfolios
+      const totals = portfolioData.reduce(
+        (acc, portfolio) => ({
+          accepted: acc.accepted + portfolio.accepted,
+          rejected: acc.rejected + portfolio.rejected,
+          pending: acc.pending + portfolio.pending,
+          waitlisted: acc.waitlisted + portfolio.waitlisted,
+        }),
+        { accepted: 0, rejected: 0, pending: 0, waitlisted: 0 },
+      )
+
+      return [
+        { status: "accepted", applicants: totals.accepted, fill: "var(--color-accepted)" },
+        { status: "rejected", applicants: totals.rejected, fill: "var(--color-rejected)" },
+        { status: "pending", applicants: totals.pending, fill: "var(--color-pending)" },
+        { status: "waitlisted", applicants: totals.waitlisted, fill: "var(--color-waitlisted)" },
+      ].filter((item) => item.applicants > 0) // Only show statuses with applications
+    } else {
+      // Show specific portfolio
+      const portfolio = portfolioData.find((p) => p.portfolio_id === selectedPortfolio)
+      if (!portfolio) return []
+
+      return [
+        { status: "accepted", applicants: portfolio.accepted, fill: "var(--color-accepted)" },
+        { status: "rejected", applicants: portfolio.rejected, fill: "var(--color-rejected)" },
+        { status: "pending", applicants: portfolio.pending, fill: "var(--color-pending)" },
+        { status: "waitlisted", applicants: portfolio.waitlisted, fill: "var(--color-waitlisted)" },
+      ].filter((item) => item.applicants > 0) // Only show statuses with applications
+    }
+  }, [portfolioData, selectedPortfolio])
 
   const activeIndex = React.useMemo(() => {
-    if (!activeStatus) return -1;
-    return chartData.findIndex((item) => item.status === activeStatus);
-  }, [selectedPortfolio, activeStatus]);
+    if (!activeStatus) return -1
+    return chartData.findIndex((item) => item.status === activeStatus)
+  }, [chartData, activeStatus])
 
   const selectedTotal = React.useMemo(() => {
-    if (!activeStatus) return chartData.find((data) => data.status === "accepted")?.applicants || 0;
-    return chartData.find((data) => data.status === activeStatus)?.applicants || 0; 
-  }, [selectedPortfolio, activeStatus]);
+    if (!activeStatus) {
+      // Show accepted count for acceptance rate calculation
+      const acceptedData = chartData.find((data) => data.status === "accepted")
+      return acceptedData?.applicants || 0
+    }
+    return chartData.find((data) => data.status === activeStatus)?.applicants || 0
+  }, [chartData, activeStatus])
 
   const totalApplicants = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.applicants, 0)
-  }, [selectedPortfolio]);
+  }, [chartData])
+
+  const selectedPortfolioName = React.useMemo(() => {
+    if (selectedPortfolio === "all") return "All Portfolios"
+    const portfolio = portfolioData.find((p) => p.portfolio_id === selectedPortfolio)
+    return portfolio?.portfolio_name || "Unknown Portfolio"
+  }, [portfolioData, selectedPortfolio])
 
   const onClick = (data: { status: React.SetStateAction<string | null> }) => {
-    if (!data || !data.status) return;
+    if (!data || !data.status) return
     if (data.status === activeStatus) {
-      setActiveStatus(null);
+      setActiveStatus(null) // Reset to acceptance rate view
     } else {
-      setActiveStatus(data.status);
+      setActiveStatus(data.status)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <Card className={cn("flex flex-col gap-0 pb-0", className)}>
+        <CardHeader className="flex items-start space-y-0 truncate">
+          <div className="grid gap-1">
+            <CardTitle>Statuses</CardTitle>
+            <CardDescription>Loading...</CardDescription>
+          </div>
+          <Skeleton className="ml-auto h-8 w-[150px]" />
+        </CardHeader>
+        <CardContent>
+          <div className="mx-auto aspect-square max-h-[250px] flex items-center justify-center">
+            <Skeleton className="h-[200px] w-[200px] rounded-full" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error || !portfolioData.length) {
+    return (
+      <Card className={cn("flex flex-col gap-0 pb-0", className)}>
+        <CardHeader className="flex items-start space-y-0 truncate">
+          <div className="grid gap-1">
+            <CardTitle>Statuses</CardTitle>
+            <CardDescription>No data available</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="mx-auto aspect-square max-h-[250px] flex items-center justify-center text-muted-foreground">
+            {error || "No portfolio data found"}
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -77,11 +150,8 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
       <CardHeader className="flex items-start space-y-0 truncate">
         <div className="grid gap-1">
           <CardTitle>Statuses</CardTitle>
-          <CardDescription>{selectedPortfolio === "specific" ? (
-              <span>For your portfolio</span>
-            ) : (
-              <span>For all portfolios</span>
-            )}
+          <CardDescription>
+            {selectedPortfolio === "all" ? <span>For all portfolios</span> : <span>For {selectedPortfolioName}</span>}
           </CardDescription>
         </div>
         <Select value={selectedPortfolio} onValueChange={setSelectedPortfolio}>
@@ -90,22 +160,22 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="specific" className="text-xs font-normal">Competitions</SelectItem>
-              <SelectItem value="all" className="text-xs font-normal">All Portfolios</SelectItem>
+              <SelectItem value="all" className="text-xs font-normal">
+                All Portfolios
+              </SelectItem>
+              {portfolioData.map((portfolio) => (
+                <SelectItem key={portfolio.portfolio_id} value={portfolio.portfolio_id} className="text-xs font-normal">
+                  {portfolio.portfolio_name}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
           <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Pie
               data={chartData}
               dataKey="applicants"
@@ -127,44 +197,22 @@ export function SmallChartApplicationStatus({ className }: { className?: string 
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
+                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
                         {!activeStatus ? (
                           <>
-                            <tspan
-                              x={viewBox.cx}
-                              y={viewBox.cy}
-                              className="fill-foreground text-3xl font-bold"
-                            >
-                              {(selectedTotal / totalApplicants * 100).toFixed(1)}%
+                            <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold">
+                              {totalApplicants > 0 ? ((selectedTotal / totalApplicants) * 100).toFixed(1) : "0.0"}%
                             </tspan>
-                            <tspan
-                              x={viewBox.cx}
-                              y={(viewBox.cy || 0) + 24}
-                              className="fill-muted-foreground"
-                            >
+                            <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground">
                               Acceptance rate
                             </tspan>
                           </>
                         ) : (
                           <>
-                            <tspan
-                              x={viewBox.cx}
-                              y={viewBox.cy}
-                              className="fill-foreground text-3xl font-bold"
-                            >
+                            <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold">
                               {selectedTotal}
                             </tspan>
-                            <tspan
-                              x={viewBox.cx}
-                              y={(viewBox.cy || 0) + 24}
-                              className="fill-muted-foreground text-xs"
-                            >
-                              {/* using js to capitalise cos tailwind class doesn't work for some reason */}
+                            <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground text-xs">
                               {activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}
                             </tspan>
                           </>

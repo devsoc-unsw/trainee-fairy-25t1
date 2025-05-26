@@ -1,13 +1,14 @@
 "use client"
 import { ApplicationsPerDayChart } from "@/components/charts/chart-applications-per-day"
 
-import { SmallChartApplicantions } from "@/components/charts/small-charts/small-chart-applications"
+import { SmallChartApplications } from "@/components/charts/small-charts/small-chart-applications"
 import { SmallChartApplicationStatus } from "@/components/charts/small-charts/small-chart-status"
 import { SmallChartGenderRatio } from "@/components/charts/small-charts/small-chart-gender"
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApplicationsTable } from "@/components/table/applications-table"
+import { ApplicationProvider } from "@/contexts/application-context"
 
 export default function Page() {
   const router = useRouter();
@@ -58,17 +59,19 @@ export default function Page() {
   }
 
   return (
-    <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6">
-      <div className="@2xl/main:grid-cols-2 @5xl/main:grid-cols-3 grid grid-cols-1 gap-4 px-4 lg:px-6">
-        <SmallChartApplicantions />
-        <SmallChartApplicationStatus />
-        <SmallChartGenderRatio className="hidden @5xl/main:block"/>
-        <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
-      </div>
+    <ApplicationProvider>
+      <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6">
+        <div className="@2xl/main:grid-cols-2 @5xl/main:grid-cols-3 grid grid-cols-1 gap-4 px-4 lg:px-6">
+          <SmallChartApplications />
+          <SmallChartApplicationStatus />
+          <SmallChartGenderRatio className="hidden @5xl/main:block"/>
+          <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
+        </div>
 
-      <Suspense fallback={<div>Loading applications...</div>}>
-        <ApplicationsTable />
-      </Suspense>
-    </div>
+        <Suspense fallback={<div>Loading applications...</div>}>
+          <ApplicationsTable />
+        </Suspense>
+      </div>
+    </ApplicationProvider>
   )
 }

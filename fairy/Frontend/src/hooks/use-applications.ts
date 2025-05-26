@@ -4,10 +4,13 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import type { Application, ApplicationsResponse, TableState } from "@/types/application"
 import { toast } from "sonner"
 
+import { useApplicationContext } from "@/contexts/application-context"
+
 export function useApplications(tableState: TableState) {
   const [data, setData] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { triggerStatusUpdate } = useApplicationContext()
 
   // Extract individual values to avoid object reference issues
   const { globalFilter, sorting, driveId } = tableState
@@ -131,6 +134,8 @@ export function useApplications(tableState: TableState) {
             app.id === id ? { ...app, status: newStatus as "pending" | "accepted" | "rejected" | "waitlisted" } : app,
           ),
         )
+        // Trigger status update for other components
+        triggerStatusUpdate()
 
         return { success: true }
       }
@@ -155,7 +160,7 @@ export function useApplications(tableState: TableState) {
         return { success: false, error: err instanceof Error ? err.message : "Update failed" }
       }
     },
-    [driveId],
+    [driveId, triggerStatusUpdate],
   )
       
 
