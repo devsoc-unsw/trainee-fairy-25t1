@@ -18,7 +18,7 @@ router.get("/me", authenticateUser, async (req: any, res: any) => {
       .select(`
         society (
           id,
-          name,
+          alias,
           description,
           drives (
             id,
@@ -59,7 +59,7 @@ router.get("/me", authenticateUser, async (req: any, res: any) => {
 
       return {
         id: society.id,
-        name: society.name,
+        name: society.alias,
         description: society.description,
         user_role: "Admin",
         drives,
@@ -89,7 +89,7 @@ router.get("/me", authenticateUser, async (req: any, res: any) => {
             ),
             society (
               id,
-              name,
+              alias,
               description
             )
           )
@@ -133,7 +133,7 @@ router.get("/me", authenticateUser, async (req: any, res: any) => {
         } else {
           directorSocieties.push({
             id: society.id,
-            name: society.name,
+            name: society.alias,
             description: society.description,
             user_role: "Director",
             drives: [{ id: drive.id, name: drive.name }],

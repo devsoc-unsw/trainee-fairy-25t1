@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ApplicationModal } from "@/components/application-modal"
-import { useApplications, } from "@/hooks/use-applications"
+import { useApplications } from "@/hooks/use-applications"
 import type { Application, TableState } from "@/types/application"
 
 const statusConfig = {
@@ -44,7 +44,11 @@ const statusConfig = {
 export function ApplicationsTable() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const driveId = searchParams.get("drive_id") || ""
+
+  // Extract drive_id from URL
+  const driveId = searchParams.get("drive_id") || undefined
+  const applicationId = searchParams.get("application_id")
+
   const [tableState, setTableState] = useState<TableState>({
     pageIndex: 0,
     pageSize: 10,
@@ -61,54 +65,56 @@ export function ApplicationsTable() {
   const { data, loading, error, updateApplicationStatus } = useApplications(tableState)
 
   // Modal state - separate from data fetching
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
+  const [selectedApplicant, setSelectedApplicant] = useState<Application | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Handle URL parameter for application ID - but don't trigger refetch
+  // Handle URL parameter for application ID
   useEffect(() => {
-    const applicationId = searchParams.get("application_id")
     if (applicationId && data.length > 0 && !isModalOpen) {
-      const application = data.find((app) => app.id === applicationId)
-      if (application) {
-        setSelectedApplication(application)
+      const applicant = data.find((app) => app.id === applicationId)
+      if (applicant) {
+        setSelectedApplicant(applicant)
         setIsModalOpen(true)
       }
     } else if (!applicationId && isModalOpen) {
       // URL was changed externally, close modal
       setIsModalOpen(false)
-      setSelectedApplication(null)
+      setSelectedApplicant(null)
     }
-  }, [searchParams, data, isModalOpen])
+  }, [applicationId, data, isModalOpen])
 
   const handleRowClick = (application: Application) => {
-    setSelectedApplication(application)
+    setSelectedApplicant(application)
     setIsModalOpen(true)
 
-    // Update URL with application ID
+    // Update URL with application ID, preserve drive_id
     const params = new URLSearchParams(searchParams.toString())
     params.set("application_id", application.id)
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
   const handleModalOpenChange = (open: boolean) => {
-    setIsModalOpen(open)
-
     if (!open) {
-      setSelectedApplication(null)
-      // Remove application_id from URL
+      setIsModalOpen(false)
+      setSelectedApplicant(null)
+
+      // Remove application_id from URL immediately
       const params = new URLSearchParams(searchParams.toString())
       params.delete("application_id")
       const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
       router.replace(newUrl, { scroll: false })
+    } else {
+      setIsModalOpen(true)
     }
   }
 
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
-    await updateApplicationStatus(id, newStatus)
+  const handleStatusUpdateFromModal = (id: string, newStatus: "pending" | "accepted" | "rejected" | "waitlisted") => {
+    // Update the table data when status is changed from modal
+    updateApplicationStatus(id, newStatus)
 
-    // Update the selected application if it's the one being updated
-    if (selectedApplication && selectedApplication.id === id) {
-      setSelectedApplication({ ...selectedApplication, status: newStatus })
+    // Update the selected applicant state
+    if (selectedApplicant && selectedApplicant.id === id) {
+      setSelectedApplicant({ ...selectedApplicant, status: newStatus })
     }
   }
 
@@ -312,12 +318,19 @@ export function ApplicationsTable() {
   return (
     <div className="space-y-4 px-4 lg:px-6">
       <div className="flex items-center justify-between">
-        <Input
-          placeholder="Search applications..."
-          value={tableState.globalFilter}
-          onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="max-w-sm"
-        />
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="Search applications..."
+            value={tableState.globalFilter}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+            className="max-w-sm"
+          />
+          {driveId && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              Drive: {driveId}
+            </Badge>
+          )}
+        </div>
         <div className="text-sm text-muted-foreground">{loading ? "Loading..." : `${data.length} applications`}</div>
       </div>
 
@@ -381,10 +394,10 @@ export function ApplicationsTable() {
       </div>
 
       <ApplicationModal
-        application={selectedApplication}
+        applicant={selectedApplicant}
         isOpen={isModalOpen}
         onOpenChange={handleModalOpenChange}
-        onUpdateStatus={handleStatusUpdate}
+        onStatusUpdate={handleStatusUpdateFromModal}
       />
     </div>
   )

@@ -183,7 +183,7 @@ export default function LandingPage() {
             </h1>
           </div>
 
-          <DebugMenu />
+          {/* <DebugMenu /> */}
           <ScrollIndicator />
         </div>
 

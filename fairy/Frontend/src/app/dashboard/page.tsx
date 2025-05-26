@@ -5,7 +5,7 @@ import { SmallChartApplicantions } from "@/components/charts/small-charts/small-
 import { SmallChartApplicationStatus } from "@/components/charts/small-charts/small-chart-status"
 import { SmallChartGenderRatio } from "@/components/charts/small-charts/small-chart-gender"
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApplicationsTable } from "@/components/table/applications-table"
 
@@ -65,7 +65,10 @@ export default function Page() {
         <SmallChartGenderRatio className="hidden @5xl/main:block"/>
         <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
       </div>
-      <ApplicationsTable/>
+
+      <Suspense fallback={<div>Loading applications...</div>}>
+        <ApplicationsTable />
+      </Suspense>
     </div>
   )
 }

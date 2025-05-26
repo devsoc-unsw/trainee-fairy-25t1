@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 import { z } from "zod"
-import { schema } from "../table/data-table"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Application, Feedback, Flag, Question, Questions, dummyData } from "./dummy-data"
 import { useState } from "react"
@@ -127,7 +126,7 @@ const FlagBlock = ({ flag }: { flag: Flag }) => {
 }
 /* -------------------------------------------------------------------------- */
 
-export default function ApplicationViewer({ item }: { item: z.infer<typeof schema> }) {
+export default function ApplicationViewer({ item }: { item: any }) {
   const isMobile = useIsMobile()
   
   const { zid, name, email, applications, diversity, flags } = dummyData;

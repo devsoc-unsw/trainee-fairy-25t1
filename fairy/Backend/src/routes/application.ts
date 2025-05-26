@@ -25,8 +25,8 @@ router.get("/:applicationId", authenticateUser, async (req: Request, res: Respon
     }
     // For demonstration, we will return a mock response
     res.status(200).json({
-        application // Replace with actual application data 
-        })
+      application // Replace with actual application data 
+    })
 });
 
 export default router;

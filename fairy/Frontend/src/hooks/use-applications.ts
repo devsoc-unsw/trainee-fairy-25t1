@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import type { Application, ApplicationsResponse, TableState } from "@/types/application"
+import { toast } from "sonner"
 
 export function useApplications(tableState: TableState) {
   const [data, setData] = useState<Application[]>([])
@@ -79,31 +80,84 @@ export function useApplications(tableState: TableState) {
     fetchApplications()
   }, [fetchApplications, sortingKey, globalFilter, driveId])
 
-  const updateApplicationStatus = useCallback(async (id: string, newStatus: string) => {
-    try {
-      console.log(newStatus)
-      // Replace with your actual API endpoint for updating status
-      const response = await fetch("http://localhost:3000/dashboard/protected/applications/status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const updateApplicationStatus = useCallback(
+    async (id: string, newStatus: string) => {
+      const statusMessages = {
+        accepted: {
+          loading: "Accepting application...",
+          success: "Successfully accepted.",
+          description: "You have accepted this application.",
         },
-        credentials: "include", // Include credentials for authentication
-        body: JSON.stringify({ id, status: newStatus }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to update application status")
+        rejected: {
+          loading: "Rejecting application...",
+          success: "Successfully rejected.",
+          description: "You have rejected this application.",
+        },
+        waitlisted: {
+          loading: "Adding to waitlist...",
+          success: "Successfully waitlisted.",
+          description: "You have waitlisted this application.",
+        },
+        pending: {
+          loading: "Updating status...",
+          success: "Status updated to pending.",
+          description: "You have set this application to pending.",
+        },
       }
 
-      // Update the local data instead of refetching
-      setData((prevData) => prevData.map((app) => (app.id === id ? { ...app, status: newStatus } : app)))
+      const message = statusMessages[newStatus as keyof typeof statusMessages] || {
+        loading: "Updating application status...",
+        success: "Application status updated successfully.",
+        description: `You have updated this application to ${newStatus}.`,
+      }
 
-      return { success: true }
-    } catch (err) {
-      return { success: false, error: err instanceof Error ? err.message : "Update failed" }
-    }
-  }, [driveId])
+      const updatePromise = async () => {
+        const response = await fetch("http://localhost:3000/dashboard/protected/applications/status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ id, status: newStatus }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to update application status")
+        }
+
+        // Update the local data instead of refetching
+        setData((prevData) =>
+          prevData.map((app) =>
+            app.id === id ? { ...app, status: newStatus as "pending" | "accepted" | "rejected" | "waitlisted" } : app,
+          ),
+        )
+
+        return { success: true }
+      }
+
+      // Use Sonner promise toast
+      toast.promise(updatePromise(), {
+        loading: message.loading,
+        success: () => ({
+          title: message.success,
+          description: message.description,
+        }),
+        error: (error) => ({
+          title: "Failed to update status",
+          description: error.message || "An unexpected error occurred.",
+        }),
+      })
+
+      try {
+        await updatePromise()
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Update failed" }
+      }
+    },
+    [driveId],
+  )
+      
 
   return {
     data,
