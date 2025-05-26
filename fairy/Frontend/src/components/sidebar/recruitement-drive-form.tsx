@@ -10,14 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, Plus, Calendar, Users, Folder, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CheckCircle, Plus, Calendar, Users, X, FileText, Trash2, Edit3 } from "lucide-react"
 
 interface Portfolio {
-  id: string;
-  description: string | null;
-  max_capacity: number;
-  min_capacity: number;
-  name: string;
+  id: string
+  description: string | null
+  max_capacity: number
+  min_capacity: number
+  name: string
 }
 
 interface RecruitmentDrive {
@@ -29,17 +30,28 @@ interface RecruitmentDrive {
   portfolio_ids: string[]
 }
 
-interface RecruitmentDriveFormProps {
-  onClose?: () => void
-  portfolios: Portfolio[] // Ensure this prop is typed correctly as an array of Portfolio
-  societyId: string
+interface FormQuestion {
+  id: string
+  question: string
+  type: "text" | "textarea" | "select" | "checkbox" | "radio"
+  required: boolean
+  options?: string[] // For select, checkbox, radio types
+  portfolios: string[] // Portfolio IDs this question applies to ('all' means all portfolios)
 }
 
-export default function RecruitmentDriveForm({ onClose, portfolios: propPortfolios, societyId }: RecruitmentDriveFormProps) {
-  const [step, setStep] = useState<"form" | "portfolio" | "success">("form")
-  // Use the portfolios passed as a prop, not a hardcoded state
-  const [availablePortfolios, setAvailablePortfolios] = useState<Portfolio[]>(propPortfolios);
+interface RecruitmentDriveFormProps {
+  onClose?: () => void
+  portfolios?: Portfolio[] // Made optional with default
+  societyId?: string // Made optional with default
+}
 
+export default function RecruitmentDriveForm({
+  onClose,
+  portfolios: propPortfolios = [], // Default to empty array
+  societyId = "", // Default to empty string
+}: RecruitmentDriveFormProps) {
+  const [step, setStep] = useState<"form" | "portfolio" | "success">("form")
+  const [availablePortfolios, setAvailablePortfolios] = useState<Portfolio[]>(propPortfolios || [])
 
   const [driveData, setDriveData] = useState<RecruitmentDrive>({
     name: "",
@@ -51,21 +63,33 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
   })
 
   const [selectedPortfolios, setSelectedPortfolios] = useState<string[]>([])
-  const [selectedNewPortfolios, setSelectedNewPortfolios] = useState<{name: string, description: string}[]>([])
+  const [selectedNewPortfolios, setSelectedNewPortfolios] = useState<{ name: string; description: string }[]>([])
   const [newPortfolio, setNewPortfolio] = useState({ name: "", description: "" })
   const [showCreatePortfolio, setShowCreatePortfolio] = useState(false)
   const [createdDrive, setCreatedDrive] = useState<RecruitmentDrive | null>(null)
+  const [driveId, setDriveId] = useState<string[]>()
 
-  // Initialize availablePortfolios when the prop changes
+  // Form builder state
+  const [formQuestions, setFormQuestions] = useState<FormQuestion[]>([])
+  const [newQuestion, setNewQuestion] = useState<Partial<FormQuestion>>({
+    question: "",
+    type: "text",
+    required: false,
+    portfolios: [],
+    options: [],
+  })
+  const [showAddQuestion, setShowAddQuestion] = useState(false)
+  const [editingQuestion, setEditingQuestion] = useState<string | null>(null)
+
   useEffect(() => {
-    setAvailablePortfolios(propPortfolios);
-  }, [propPortfolios]);
-
+    if (propPortfolios && Array.isArray(propPortfolios)) {
+      setAvailablePortfolios(propPortfolios)
+    }
+  }, [propPortfolios])
 
   const handleDriveSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!driveData.name || !driveData.description || !driveData.open_date || !driveData.close_date) {
-      // You might want to add a more visible error message to the user here
       return
     }
     setStep("portfolio")
@@ -80,110 +104,110 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
   const handleCreatePortfolio = () => {
     if (!newPortfolio.name || !newPortfolio.description) return
 
-    // Generate a unique ID for the new portfolio (for client-side demonstration)
-    // In a real application, this ID would likely come from your backend after creation
-    const newPortfolioId = `new-${Date.now()}`;
+    const newPortfolioId = `new-${Date.now()}`
     const portfolio: Portfolio = {
       id: newPortfolioId,
       name: newPortfolio.name,
       description: newPortfolio.description,
       max_capacity: 0,
-      min_capacity: 0
+      min_capacity: 0,
     }
 
-    setAvailablePortfolios((prev) => [...prev, portfolio]) // Add to available portfolios
-    // setSelectedPortfolios((prev) => [...prev, newPortfolioId]) // Select the newly created one
-    setSelectedNewPortfolios(prev => [...prev, { name: newPortfolio.name, description: newPortfolio.description }])
+    setAvailablePortfolios((prev) => [...prev, portfolio])
+    setSelectedNewPortfolios((prev) => [...prev, { name: newPortfolio.name, description: newPortfolio.description }])
     setNewPortfolio({ name: "", description: "" })
     setShowCreatePortfolio(false)
   }
 
   const handlePortfolioSelection = async () => {
     if (selectedPortfolios.length === 0) {
-      // Consider showing a warning to the user if no portfolios are selected
       return
     }
 
     const finalDrive: RecruitmentDrive = {
       ...driveData,
       portfolio_ids: selectedPortfolios,
-      created_at: new Date().toISOString(), // Ensure created_at is updated on final submission
+      created_at: new Date().toISOString(),
     }
-    
-    console.log(driveData)
-    try {
-      const response = await fetch('http://localhost:3000/drives/create', {
-        method: 'POST',
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json", // ✅ Required
-        },
-        body: JSON.stringify({
-          name: driveData.name,
-          description: driveData.description,
-          societyId,
-          open_date: driveData.open_date,
-          close_date: driveData.close_date
-        }),
-      });
 
-      const result = await response.json();
+    // Only make API calls if societyId is provided
+    if (societyId) {
+      try {
+        const response = await fetch("http://localhost:3000/drives/create", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: driveData.name,
+            description: driveData.description,
+            societyId,
+            open_date: driveData.open_date,
+            close_date: driveData.close_date,
+          }),
+        })
 
-      if (response.ok) {
-        console.log("drive created"); // You can use this as needed
-        console.log(result)
-        const driveId = result.drive[0].id;
-        console.log(driveId)
+        const result = await response.json()
 
-        // Create all new portfolios associated with this drive
-        await Promise.all(selectedNewPortfolios.map(portfolio => 
-          fetch('http://localhost:3000/portfolio/create', {
-            method: 'POST',
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: portfolio.name,
-              description: portfolio.description,
-              driveId: driveId,
-            }),
-          })
-        ));
+        if (response.ok) {
+          setDriveId(result.drive[0].id)
+          const tempdrivId = result.drive[0].id
+          const createdPortfolios: Portfolio[] = []
 
-      
-        
-        // Now update the driveId of all existing selected portfolios
-        await Promise.all(selectedPortfolios.map(async (portfolioId) => {
-          // Skip portfolios that were just created (handled separately)
-          if (portfolioId.startsWith("new-")) return;
-
-          console.log(portfolioId);
-          try {
-            const response = await fetch(`http://localhost:3000/portfolio/update-drive/${portfolioId}`, {
-              method: 'PATCH',
+          for (const portfolio of selectedNewPortfolios) {
+            console.log(portfolio)
+            const res = await fetch("http://localhost:3000/portfolio/create", {
+              method: "POST",
               credentials: "include",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
-              body: JSON.stringify({ driveId }),
-            });
+              body: JSON.stringify({
+                name: portfolio.name,
+                description: portfolio.description,
+                driveId: tempdrivId,
+              }),
+            })
 
-            if (!response.ok) {
-              const errorData = await response.json();
-              console.error(`Failed to update driveId for portfolio ${portfolioId}:`, errorData.error);
+            const data = await res.json()
+
+            if (res.ok && data?.portfolio?.[0]) {
+              const newPort: Portfolio = data.portfolio[0]
+              createdPortfolios.push(newPort)
             }
-          } catch (error) {
-            console.error(`Unexpected error updating portfolio ${portfolioId}:`, error);
           }
-        }));
 
+          await Promise.all(
+            selectedPortfolios
+              .filter((portfolioId) => !portfolioId.startsWith("new-")) // Filter out new portfolios
+              .map(async (portfolioId) => {
+                try {
+                  await fetch(`http://localhost:3000/portfolio/update-drive/${portfolioId}`, {
+                    method: "PATCH",
+                    credentials: "include",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ driveId }),
+                  })
+                } catch (error) {
+                  console.error(`Error updating portfolio ${portfolioId}:`, error)
+                }
+              }),
+          )
 
-      } else {
-        console.error(`❌ Error: ${result.error}`);
+          setAvailablePortfolios((prev) => [...prev, ...createdPortfolios])
+          setSelectedPortfolios((prev) => [
+            ...prev.filter((id) => !id.startsWith("new-")),
+            ...createdPortfolios.map((p) => p.id),
+          ])
+        } else {
+          console.error(`Error: ${result.error}`)
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err)
       }
-    } catch (err) {
-      console.error('Unexpected error:', err);
     }
 
     setCreatedDrive(finalDrive)
@@ -204,15 +228,148 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
     setNewPortfolio({ name: "", description: "" })
     setShowCreatePortfolio(false)
     setCreatedDrive(null)
+    setFormQuestions([])
+    setNewQuestion({
+      question: "",
+      type: "text",
+      required: false,
+      portfolios: [],
+      options: [],
+    })
+    setShowAddQuestion(false)
+    setEditingQuestion(null)
   }
 
   const getSelectedPortfolioNames = (portfolioIds: string[]) => {
-    // Use availablePortfolios for lookup
+    if (!Array.isArray(portfolioIds) || !Array.isArray(availablePortfolios)) {
+      return []
+    }
     return portfolioIds.map((id) => availablePortfolios.find((p) => p.id === id)?.name).filter(Boolean)
   }
 
+  const getSelectedPortfolios = () => {
+    if (!Array.isArray(availablePortfolios) || !Array.isArray(selectedPortfolios)) {
+      return []
+    }
+    // Use Set to remove duplicates and filter selected portfolios
+    const uniqueSelectedIds = [...new Set(selectedPortfolios)]
+    return availablePortfolios.filter((p) => uniqueSelectedIds.includes(p.id))
+  }
+
+  const handleAddQuestion = () => {
+    if (!newQuestion.question) return
+
+    // Handle "All portfolios" selection - if no specific portfolios are selected,
+    // add all selected portfolios from the drive
+    let questionPortfolios = newQuestion.portfolios || []
+    if (questionPortfolios.length === 0) {
+      // "All portfolios" is selected, so add all portfolios from selectedPortfolios
+      questionPortfolios = [...selectedPortfolios.filter((id) => !id.startsWith("new-"))]
+    }
+
+    const question: FormQuestion = {
+      id: editingQuestion || `q-${Date.now()}`,
+      question: newQuestion.question,
+      type: newQuestion.type || "text",
+      required: newQuestion.required || false,
+      options: newQuestion.options || [],
+      portfolios: questionPortfolios,
+    }
+
+    if (editingQuestion) {
+      setFormQuestions((prev) => prev.map((q) => (q.id === editingQuestion ? question : q)))
+      setEditingQuestion(null)
+    } else {
+      setFormQuestions((prev) => [...prev, question])
+    }
+
+    setNewQuestion({
+      question: "",
+      type: "text",
+      required: false,
+      portfolios: [],
+      options: [],
+    })
+    setShowAddQuestion(false)
+  }
+
+  const handleEditQuestion = (questionId: string) => {
+    const question = formQuestions.find((q) => q.id === questionId)
+    if (question) {
+      setNewQuestion(question)
+      setEditingQuestion(questionId)
+      setShowAddQuestion(true)
+    }
+  }
+
+  const handleDeleteQuestion = (questionId: string) => {
+    setFormQuestions((prev) => prev.filter((q) => q.id !== questionId))
+  }
+
+  const handlePortfolioSelectionForQuestion = (portfolioId: string) => {
+    setNewQuestion((prev) => {
+      const currentPortfolios = prev.portfolios || []
+      const isCurrentlySelected = currentPortfolios.includes(portfolioId)
+
+      if (isCurrentlySelected) {
+        // Remove the portfolio
+        return {
+          ...prev,
+          portfolios: currentPortfolios.filter((id) => id !== portfolioId),
+        }
+      } else {
+        // Add the portfolio
+        return {
+          ...prev,
+          portfolios: [...currentPortfolios, portfolioId],
+        }
+      }
+    })
+  }
+
+  const handleOptionChange = (index: number, value: string) => {
+    setNewQuestion((prev) => ({
+      ...prev,
+      options: prev.options?.map((opt, i) => (i === index ? value : opt)) || [],
+    }))
+  }
+
+  const addOption = () => {
+    setNewQuestion((prev) => ({
+      ...prev,
+      options: [...(prev.options || []), ""],
+    }))
+  }
+
+  const removeOption = (index: number) => {
+    setNewQuestion((prev) => ({
+      ...prev,
+      options: prev.options?.filter((_, i) => i !== index) || [],
+    }))
+  }
+
+  const getPortfolioNamesForQuestion = (portfolioIds: string[]) => {
+    if (!Array.isArray(portfolioIds) || portfolioIds.length === 0) return "All portfolios"
+    if (!Array.isArray(availablePortfolios)) return "All portfolios"
+
+    // Check if this question applies to all selected portfolios
+    const selectedPortfolioIds = selectedPortfolios.filter((id) => !id.startsWith("new-"))
+    const isAllSelectedPortfolios =
+      selectedPortfolioIds.length > 0 &&
+      selectedPortfolioIds.every((id) => portfolioIds.includes(id)) &&
+      portfolioIds.length === selectedPortfolioIds.length
+
+    if (isAllSelectedPortfolios) {
+      return "All portfolios"
+    }
+
+    return portfolioIds
+      .map((id) => availablePortfolios.find((p) => p.id === id)?.name)
+      .filter(Boolean)
+      .join(", ")
+  }
+
   const handleBackdropClick = (e: React.MouseEvent) => {
-    //window.location.reload();
     if (e.target === e.currentTarget) {
       onClose?.()
     }
@@ -224,68 +381,310 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <Card className="w-full max-w-md mx-auto relative animate-in fade-in-0 zoom-in-95 duration-300">
+        <Card className="w-full max-w-2xl mx-auto relative animate-in fade-in-0 zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
           {onClose && (
-            <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-8 w-8" onClick={onClose}>
+            <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-8 w-8 z-10" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           )}
-          <CardHeader className="text-center pb-4">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <CardTitle className="text-lg text-green-600">Drive Created Successfully!</CardTitle>
+                <CardDescription className="text-sm">Now create the application form</CardDescription>
+              </div>
             </div>
-            <CardTitle className="text-xl text-green-600">Drive Created Successfully!</CardTitle>
-            <CardDescription className="text-sm">
-              Your recruitment drive has been created and added to the selected portfolios.
-            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pt-0">
+
+          <CardContent className="space-y-6 pt-0">
+            {/* Drive Summary */}
             {createdDrive && (
-              <div className="rounded-lg border p-3 space-y-3">
+              <div className="rounded-lg border p-3 space-y-3 bg-muted/20">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-blue-600" />
                   <h3 className="font-semibold text-sm">{createdDrive.name}</h3>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{createdDrive.description}</p>
-
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <span className="font-medium">Opens:</span>
-                    <p className="text-muted-foreground">{new Date(createdDrive.open_date).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Closes:</span>
-                    <p className="text-muted-foreground">{new Date(createdDrive.close_date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="font-medium flex items-center gap-2 mb-2 text-sm">
-                    <Folder className="h-3 w-3" />
-                    Portfolios ({createdDrive.portfolio_ids.length}):
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {getSelectedPortfolioNames(createdDrive.portfolio_ids).map((name, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-1">
+                  {getSelectedPortfolioNames(createdDrive.portfolio_ids).map((name, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {name}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
-            <div className="flex gap-2">
-              <Button onClick={resetForm} className="flex-1" size="sm">
+
+            {/* Form Builder */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold text-sm">Application Form Questions</h3>
+                </div>
+                <Button onClick={() => setShowAddQuestion(true)} size="sm" variant="outline">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Question
+                </Button>
+              </div>
+
+              {/* Questions List */}
+              <div className="space-y-3">
+                {formQuestions.map((question, index) => (
+                  <div key={question.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-medium text-muted-foreground">Q{index + 1}</span>
+                          <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                            {question.type}
+                          </span>
+                          {question.required && (
+                            <span className="text-xs px-1.5 py-0.5 bg-red-100 text-red-700 rounded">Required</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium">{question.question}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          For: {getPortfolioNamesForQuestion(question.portfolios)}
+                        </p>
+                        {question.options && question.options.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted-foreground mb-1">Options:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {question.options.map((option, i) => (
+                                <span key={i} className="text-xs px-2 py-0.5 bg-muted rounded">
+                                  {option}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-1 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditQuestion(question.id)}
+                          className="h-7 w-7 p-0"
+                        >
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteQuestion(question.id)}
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {formQuestions.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No questions added yet</p>
+                    <p className="text-xs">Click "Add Question" to get started</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Question Form */}
+              {showAddQuestion && (
+                <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm">{editingQuestion ? "Edit Question" : "Add New Question"}</h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowAddQuestion(false)
+                        setEditingQuestion(null)
+                        setNewQuestion({
+                          question: "",
+                          type: "text",
+                          required: false,
+                          portfolios: [],
+                          options: [],
+                        })
+                      }}
+                      className="h-7 w-7 p-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-sm">Question *</Label>
+                      <Textarea
+                        value={newQuestion.question || ""}
+                        onChange={(e) => setNewQuestion((prev) => ({ ...prev, question: e.target.value }))}
+                        placeholder="Enter your question"
+                        className="min-h-[60px] text-sm"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-sm">Question Type</Label>
+                        <Select
+                          value={newQuestion.type || "text"}
+                          onValueChange={(value: any) => setNewQuestion((prev) => ({ ...prev, type: value }))}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text Input</SelectItem>
+                            <SelectItem value="textarea">Long Text</SelectItem>
+                            <SelectItem value="select">Dropdown</SelectItem>
+                            <SelectItem value="radio">Multiple Choice</SelectItem>
+                            <SelectItem value="checkbox">Checkboxes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-sm">Required</Label>
+                        <div className="flex items-center space-x-2 h-8">
+                          <Checkbox
+                            checked={newQuestion.required || false}
+                            onCheckedChange={(checked) => setNewQuestion((prev) => ({ ...prev, required: !!checked }))}
+                          />
+                          <span className="text-sm">Required field</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Options for select/radio/checkbox */}
+                    {(newQuestion.type === "select" ||
+                      newQuestion.type === "radio" ||
+                      newQuestion.type === "checkbox") && (
+                      <div className="space-y-2">
+                        <Label className="text-sm">Options</Label>
+                        {(newQuestion.options || []).map((option, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={option}
+                              onChange={(e) => handleOptionChange(index, e.target.value)}
+                              placeholder={`Option ${index + 1}`}
+                              className="h-7 text-sm"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeOption(index)}
+                              className="h-7 w-7 p-0 text-red-600"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" size="sm" onClick={addOption}>
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Option
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Portfolio Selection */}
+                    <div className="space-y-2">
+                      <Label className="text-sm">Apply to Portfolios</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={(newQuestion.portfolios?.length || 0) === 0}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewQuestion((prev) => ({ ...prev, portfolios: [] }))
+                              } else {
+                                // When unchecking "All portfolios", don't automatically select any specific portfolios
+                                setNewQuestion((prev) => ({ ...prev, portfolios: [] }))
+                              }
+                            }}
+                          />
+                          <span className="text-sm">All portfolios</span>
+                        </div>
+                        {getSelectedPortfolios().map((portfolio) => (
+                          <div key={portfolio.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={newQuestion.portfolios?.includes(portfolio.id) || false}
+                              onCheckedChange={() => handlePortfolioSelectionForQuestion(portfolio.id)}
+                              disabled={false} // Remove the disabled condition that was preventing selection
+                            />
+                            <span className="text-sm">{portfolio.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddQuestion} size="sm" className="flex-1">
+                        {editingQuestion ? "Update Question" : "Add Question"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-4 border-t">
+              <Button onClick={resetForm} variant="outline" className="flex-1" size="sm">
                 Create Another Drive
               </Button>
-              {onClose && (
-                <Button onClick={onClose} variant="outline" className="flex-1" size="sm">
-                  Close
-                </Button>
-              )}
+              <Button
+                onClick={async () => {
+                  // Log the form questions
+                  console.log("Form Questions:", formQuestions)
+
+                  // Create the form via API if we have questions and societyId
+                  if (formQuestions.length > 0 && societyId && createdDrive) {
+                    try {
+                      const response = await fetch("http://localhost:3000/drives/form/create", {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          driveId: driveId, // Assuming this contains the drive ID from backend
+                          questions: formQuestions,
+                          societyId: societyId,
+                        }),
+                      })
+                      
+
+                      const result = await response.json()
+
+                      if (response.ok) {
+                        console.log("Form created successfully:", result)
+                      } else {
+                        console.error("Failed to create form:", result.error)
+                      }
+                    } catch (error) {
+                      console.error("Error creating form:", error)
+                    }
+                  } else if (formQuestions.length === 0) {
+                    console.log("No questions to save - form creation skipped")
+                  }
+
+                  // Close the modal
+                  onClose?.()
+                }}
+                className="flex-1"
+                size="sm"
+              >
+                Finish & Close
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -312,7 +711,7 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
-            {availablePortfolios.length === 0 ? ( // Use availablePortfolios here
+            {!Array.isArray(availablePortfolios) || availablePortfolios.length === 0 ? (
               <Alert>
                 <AlertDescription className="text-sm">
                   No portfolio exists. Please add a portfolio to proceed.
@@ -323,7 +722,7 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
                 <div>
                   <Label className="text-sm font-medium">Select Portfolios</Label>
                   <div className="space-y-2 mt-2">
-                    {availablePortfolios.map((portfolio) => ( // Use availablePortfolios here
+                    {availablePortfolios.map((portfolio) => (
                       <div
                         key={portfolio.id}
                         className="flex items-start space-x-3 p-2 border rounded-lg hover:bg-muted/50 cursor-pointer"
@@ -487,28 +886,32 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
                 <Label htmlFor="open_date" className="text-sm">
                   Open Date *
                 </Label>
-                <Input
-                  id="open_date"
-                  type="datetime-local"
-                  value={driveData.open_date}
-                  onChange={(e) => setDriveData({ ...driveData, open_date: e.target.value })}
-                  required
-                  className="h-8 text-sm"
-                />
+                <div className="relative">
+                  <Input
+                    id="open_date"
+                    type="datetime-local"
+                    value={driveData.open_date}
+                    onChange={(e) => setDriveData({ ...driveData, open_date: e.target.value })}
+                    required
+                    className="h-8 text-sm pr-8"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="close_date" className="text-sm">
                   Close Date *
                 </Label>
-                <Input
-                  id="close_date"
-                  type="datetime-local"
-                  value={driveData.close_date}
-                  onChange={(e) => setDriveData({ ...driveData, close_date: e.target.value })}
-                  required
-                  className="h-8 text-sm"
-                />
+                <div className="relative">
+                  <Input
+                    id="close_date"
+                    type="datetime-local"
+                    value={driveData.close_date}
+                    onChange={(e) => setDriveData({ ...driveData, close_date: e.target.value })}
+                    required
+                    className="h-8 text-sm pr-8"
+                  />
+                </div>
               </div>
             </div>
 
@@ -516,14 +919,17 @@ export default function RecruitmentDriveForm({ onClose, portfolios: propPortfoli
               <Label htmlFor="created_at" className="text-sm">
                 Created At
               </Label>
-              <Input
-                id="created_at"
-                type="datetime-local"
-                value={driveData.created_at.slice(0, 16)}
-                onChange={(e) => setDriveData({ ...driveData, created_at: new Date(e.target.value).toISOString() })}
-                disabled
-                className="h-8 text-sm"
-              />
+              <div className="relative">
+                <Input
+                  id="created_at"
+                  type="datetime-local"
+                  value={driveData.created_at.slice(0, 16)}
+                  onChange={(e) => setDriveData({ ...driveData, created_at: new Date(e.target.value).toISOString() })}
+                  disabled
+                  className="h-8 text-sm pr-8"
+                />
+                <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground pointer-events-none" />
+              </div>
               <p className="text-xs text-muted-foreground">
                 This field is automatically set to the current date and time.
               </p>

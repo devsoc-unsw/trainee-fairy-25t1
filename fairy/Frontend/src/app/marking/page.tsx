@@ -28,7 +28,7 @@ const Page = () => {
   useEffect(() => {
     const fetchSocieties = async () => {
       try {
-        const res = await fetch('http://localhost:3000/apply/drives', {
+        const res = await fetch('http://localhost:3000/mark/drives', {
           credentials: 'include',
         });
 
@@ -41,7 +41,7 @@ const Page = () => {
         const data = await res.json();
         setDrives(data.drives);
       } catch (err) {
-        console.error('Failed to fetch societies:', err);
+        console.error('Failed to fetch drives:', err);
       } finally {
         setLoading(false);
       }
@@ -52,20 +52,20 @@ const Page = () => {
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
+
   const formatLink = (s_alias: string, d_name: string) => {
-    return `/${s_alias.toLowerCase().replace(/\s+/g, '-')}/${d_name.toLowerCase().replace(/\s+/g, '-')}`;
+    return `/dashboard/${s_alias.toLowerCase().replace(/\s+/g, '-')}/${d_name.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
   return (
     <div >
-      <main className="bg-[#0a0a0a]">
+      <main className="bg-foreground">
         <div className="bg-background min-h-screen rounded-b-4xl">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold mb-4">Currently recruiting...</h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Discover amazing opportunities to get involved and make your mark on campus. Join a society that matches
-                your interests and ambitions.
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">Currently marking...</h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Here you can find all the drives that are currently open for marking. Click on a drive to view more details and submit your portfolio.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

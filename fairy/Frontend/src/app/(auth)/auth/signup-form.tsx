@@ -13,13 +13,6 @@ interface SignUpFormValues {
   last_name: string
   email: string
   password: string
-  terms: boolean
-  student_id: string
-  degree: string
-  gender: "male" | "female" | "other"
-  study_year: number
-  is_pg: boolean
-  is_intl: boolean
 }
 
 interface SignUpFormProps {
@@ -41,13 +34,6 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
       last_name: "",
       email: "",
       password: "",
-      terms: false,
-      student_id: "",
-      degree: "",
-      gender: "other",
-      study_year: 1,
-      is_pg: false,
-      is_intl: false,
     },
   })
 
@@ -66,12 +52,6 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
           data: {
             first_name: data.first_name,
             last_name: data.last_name,
-            student_id: data.student_id,
-            degree: data.degree,
-            gender: data.gender,
-            study_year: data.study_year,
-            is_pg: data.is_pg,
-            is_intl: data.is_intl,
           },
         }),
       })
@@ -161,65 +141,6 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
         {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="student_id">Student ID</Label>
-        <Input
-          id="student_id"
-          type="text"
-          placeholder="e.g. z1234567"
-          {...register("student_id", { required: "Student ID is required" })}
-        />
-        {errors.student_id && <p className="text-xs text-red-500">{errors.student_id.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="degree">Degree</Label>
-        <Input
-          id="degree"
-          type="text"
-          placeholder="Computer Science"
-          {...register("degree", { required: "Degree is required" })}
-        />
-        {errors.degree && <p className="text-xs text-red-500">{errors.degree.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="gender">Gender</Label>
-        <select
-          id="gender"
-          className="w-full h-10 border rounded px-2"
-          {...register("gender", { required: "Gender is required" })}
-        >
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-        {errors.gender && <p className="text-xs text-red-500">{errors.gender.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="study_year">Year of Study</Label>
-        <Input
-          id="study_year"
-          type="number"
-          {...register("study_year", {
-            required: "Study year is required",
-            min: { value: 1, message: "Minimum is 1" },
-          })}
-        />
-        {errors.study_year && <p className="text-xs text-red-500">{errors.study_year.message}</p>}
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input type="checkbox" id="is_pg" {...register("is_pg")} />
-        <Label htmlFor="is_pg">Postgraduate student</Label>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input type="checkbox" id="is_intl" {...register("is_intl")} />
-        <Label htmlFor="is_intl">International student</Label>
-      </div>
-
       <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white" disabled={isLoading}>
         {isLoading ? "Creating account..." : "Create account"}
       </Button>
@@ -229,7 +150,7 @@ export function SignUpForm({ onSuccess }: SignUpFormProps) {
           <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-white px-2 text-slate-500">Or continue with</span>
+          <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
         </div>
       </div>
 

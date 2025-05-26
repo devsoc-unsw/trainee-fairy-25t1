@@ -11,6 +11,7 @@ import userRoutes from "./routes/users"
 import applyRoutes from "./routes/apply"
 import driveRoutes from "./routes/drives"
 import portfolioRoutes from "./routes/portfolio"
+import markRoutes from "./routes/mark"
 
 dotenv.config();
 const app = express();
@@ -45,7 +46,7 @@ app.use("/users", userRoutes)
 app.use("/apply", applyRoutes)
 app.use("/portfolio", portfolioRoutes)
 app.use("/drives", driveRoutes)
-
+app.use("/mark", markRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

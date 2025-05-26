@@ -8,7 +8,7 @@ const router = Router();
 // Route to create a new portfolio
 router.post('/create', authenticateUser, async (req:any, res:any) => {
   const { name, description, driveId } = req.body; // Assuming the request body contains the portfolio name and society ID
-
+  console.log(name, description, driveId)
   if (!name || !driveId) {
     return res.status(400).json({ error: 'Name and Society ID are required.' });
   }
@@ -18,13 +18,13 @@ router.post('/create', authenticateUser, async (req:any, res:any) => {
   try {
     const { data, error } = await supabase
       .from('portfolios') // Replace with your actual table name
-      .insert([{ name, drive: driveId, description, min_capacity: 0, max_capacity: 10 }]); // Adjust the column names as per your schema
-
+      .insert([{ name, drive: driveId, description, min_capacity: 0, max_capacity: 10 }]) // Adjust the column names as per your schema
+      .select('id, name, description');
     if (error) {
       console.error("Error creating portfolio:", error);
       return res.status(500).json({ error: 'Error creating portfolio.' });
     }
-
+    console.log(data)
     res.status(201).json({ message: 'Portfolio created successfully.', portfolio: data });
   } catch (err) {
     console.error("Unexpected error:", err);

@@ -8,6 +8,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 interface Drive {
   id: string
@@ -28,7 +29,15 @@ export function NavDrives({
           {drives.map((drive) => (
             <SidebarMenuSubItem key={drive.id}>
               <SidebarMenuSubButton asChild isActive={drive.isActive}>
-                <a href={`/drives/${drive.id}`}>{drive.name}</a>
+                <Link href={{
+                  pathname: "/dashboard",
+                  query: { drive_id: drive.id },
+                }}
+                >
+                  <span className="flex items-center">
+                    <span className="truncate">{drive.name}</span>
+                  </span>
+                </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           ))}
