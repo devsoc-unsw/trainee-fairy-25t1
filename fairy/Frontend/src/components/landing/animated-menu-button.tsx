@@ -23,19 +23,15 @@ const variants =  {
 }
 const links = [
   {
-    title: "Projects",
-    href: "/",
+    title: "Apply",
+    href: "/recruiting",
   },
   {
-    title: "Agency",
-    href: "/",
+    title: "Dashboard",
+    href: "/dashboard",
   },
   {
-    title: "Expertise",
-    href: "/",
-  },
-  {
-    title: "Careers",
+    title: "Societies",
     href: "/",
   },
   {
@@ -69,8 +65,8 @@ const perspective = {
 }
 const footerLinks = [
   {
-    title: "Facebook",
-    href: "/",
+    title: "GitHub",
+    href: "https://github.com/devsoc-unsw/trainee-fairy-25t1/tree/main",
   },
   {
     title: "LinkedIn",

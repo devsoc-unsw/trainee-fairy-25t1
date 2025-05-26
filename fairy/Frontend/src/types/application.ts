@@ -4,7 +4,20 @@ export interface Application {
   last_name: string
   email: string
   portfolio: string
-  status: string
+  status: "pending" | "accepted" | "rejected" | "waitlisted"
+}
+
+export interface ApplicationQuestion {
+  question_id: string
+  question_label: string
+  answer_id: string
+  answer: string
+  order_index: number
+}
+
+export interface ApplicationDetails {
+  applicant: Application
+  questions: ApplicationQuestion[]
 }
 
 export interface ApplicationsResponse {
@@ -19,5 +32,5 @@ export interface TableState {
     desc: boolean
   }>
   globalFilter: string
-  driveId: string
+  driveId?: string
 }
