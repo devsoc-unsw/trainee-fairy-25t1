@@ -30,10 +30,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* TODO: remove before prod */}
-        <script
+        {/* <script
           crossOrigin="anonymous"
           src="//unpkg.com/react-scan/dist/auto.global.js"
-        />
+        /> */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overscroll-none`}
@@ -44,7 +44,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TailwindBreakpointIndicator /> {/* TODO: remove before prod */}
+          {/* TODO: remove before prod */}
+          {/* <TailwindBreakpointIndicator />  */}
           <Toaster />
           <ConditionalLayout>
             {children}

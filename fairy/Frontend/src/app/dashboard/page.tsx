@@ -61,10 +61,10 @@ export default function Page() {
   return (
     <ApplicationProvider>
       <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6">
-        <div className="@2xl/main:grid-cols-2 @5xl/main:grid-cols-3 grid grid-cols-1 gap-4 px-4 lg:px-6">
+        <div className="@2xl/main:grid-cols-2 @5xl/main:grid-cols-2 grid grid-cols-1 gap-4 px-4 lg:px-6">
           <SmallChartApplications />
           <SmallChartApplicationStatus />
-          <SmallChartGenderRatio className="hidden @5xl/main:block"/>
+          {/* <SmallChartGenderRatio className="hidden @5xl/main:block"/> */}
           <ApplicationsPerDayChart className="hidden @2xl/main:block col-span-full"/>
         </div>
 
